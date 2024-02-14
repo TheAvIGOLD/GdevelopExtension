@@ -1,0 +1,735 @@
+{
+  "author": "",
+  "category": "General",
+  "extensionNamespace": "",
+  "fullName": "Terrain",
+  "helpPath": "",
+  "iconUrl": "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz48IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9HcmFwaGljcy9TVkcvMS4xL0RURC9zdmcxMS5kdGQiPjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0ibWRpLXRlcnJhaW4iIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBkPSJNMTQsNkwxMC4yNSwxMUwxMy4xLDE0LjhMMTEuNSwxNkM5LjgxLDEzLjc1IDcsMTAgNywxMEwxLDE4SDIzTDE0LDZaIiAvPjwvc3ZnPg==",
+  "name": "Terrain",
+  "previewIconUrl": "https://asset-resources.gdevelop.io/public-resources/Icons/10e0a26c0d500830dfe23b94138beb0ef61607ba62bca05a5aa5c849777f1b06_terrain.svg",
+  "shortDescription": "Terrain creation and tools for its modification",
+  "version": "0.0.1",
+  "description": "The extension allows for terrain creation, geometry modification, and coloring based on the Z-coordinate of its vertices. (Early access, many features are still in development)",
+  "tags": [
+    "3d"
+  ],
+  "authorIds": [
+    "l2OaORwcgyX7y4HQY2dHPmdTuDj2"
+  ],
+  "dependencies": [],
+  "eventsFunctions": [
+    {
+      "fullName": "",
+      "functionType": "Action",
+      "name": "onSceneLoaded",
+      "sentence": "",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "runtimeScene._plane3DExtension = {};",
+            "runtimeScene._plane3DExtension.planes = new Map();",
+            ""
+          ],
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": false
+        },
+        {
+          "disabled": true,
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [],
+          "actions": [
+            {
+              "type": {
+                "value": "ModVarScene"
+              },
+              "parameters": [
+                "_Terrain_Vertex_Count",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "ModVarScene"
+              },
+              "parameters": [
+                "_Terrain_Vertex_Loop_Count",
+                "=",
+                "0"
+              ]
+            }
+          ]
+        }
+      ],
+      "parameters": [],
+      "objectGroups": []
+    },
+    {
+      "description": "Create terrain with specified color",
+      "fullName": "Create terrain ",
+      "functionType": "Action",
+      "name": "CreatePlaneColor",
+      "sentence": "Create terrain _PARAM1_ Color: _PARAM2_, Width: _PARAM6_, Height: _PARAM7_ in X: _PARAM3_, Y: _PARAM4_, Z: _PARAM5_, Segments count: _PARAM8_, Flat: _PARAM9_",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "const planeIdentifier = eventsFunctionContext.getArgument(\"Identifier\");",
+            "",
+            "if (!runtimeScene._plane3DExtension.planes.has(planeIdentifier)) {",
+            "    const width = eventsFunctionContext.getArgument(\"Width\");",
+            "    const height = eventsFunctionContext.getArgument(\"Height\");",
+            "    const geometry = new THREE.PlaneGeometry(width, height, eventsFunctionContext.getArgument(\"Segments\"), eventsFunctionContext.getArgument(\"Segments\"));",
+            "",
+            "    const colors = [];",
+            "    for (let i = 0; i < geometry.attributes.position.count; i++) {",
+            "        colors.push(1, 1, 1);",
+            "    }",
+            "    geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));",
+            "",
+            "    const rgbColorGD = gdjs.rgbOrHexToRGBColor(eventsFunctionContext.getArgument(\"Color\"));",
+            "    const rgbColor = new THREE.Color(\"rgb(\" + rgbColorGD[0] + \", \" + rgbColorGD[1] + \", \" + rgbColorGD[2] + \")\");",
+            "    ",
+            "    const material = new THREE.MeshStandardMaterial({ color: rgbColor, flatShading: eventsFunctionContext.getArgument(\"Flat\")});",
+            "    material.vertexColors = THREE.VertexColors;",
+            "",
+            "    const plane = new THREE.Mesh(geometry, material);",
+            "    ",
+            "    plane.position.set(",
+            "        eventsFunctionContext.getArgument(\"X\"),",
+            "        eventsFunctionContext.getArgument(\"Y\"),",
+            "        eventsFunctionContext.getArgument(\"Z\")",
+            "    );",
+            "",
+            "    const scene = runtimeScene.getLayer('').getRenderer().getThreeScene();",
+            "    scene.add(plane);",
+            "",
+            "    runtimeScene._plane3DExtension.planes.set(planeIdentifier, { plane });",
+            "",
+            "} else {",
+            "    console.error(\"Plane with the specified identifier already exists.\");",
+            "}",
+            ""
+          ],
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": true
+        }
+      ],
+      "parameters": [
+        {
+          "description": "Identifier",
+          "name": "Identifier",
+          "type": "string"
+        },
+        {
+          "description": "Color",
+          "name": "Color",
+          "type": "color"
+        },
+        {
+          "description": "X position",
+          "name": "X",
+          "type": "expression"
+        },
+        {
+          "description": "Y position",
+          "name": "Y",
+          "type": "expression"
+        },
+        {
+          "description": "Z position",
+          "name": "Z",
+          "type": "expression"
+        },
+        {
+          "description": "Width",
+          "name": "Width",
+          "type": "expression"
+        },
+        {
+          "description": "Height",
+          "name": "Height",
+          "type": "expression"
+        },
+        {
+          "description": "Count of segments on the plane (resolution)",
+          "name": "Segments",
+          "type": "expression"
+        },
+        {
+          "description": "Flat Shading",
+          "name": "Flat",
+          "type": "trueorfalse"
+        }
+      ],
+      "objectGroups": []
+    },
+    {
+      "fullName": "Set terrain position",
+      "functionType": "Action",
+      "name": "Terrain_position",
+      "sentence": "Set position _PARAM1_ X: _PARAM2_, Y: _PARAM3_, Z: _PARAM4_",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "const planeIdentifier = eventsFunctionContext.getArgument(\"Identifier\");",
+            "",
+            "const newX = eventsFunctionContext.getArgument(\"PosX\");",
+            "const newY = eventsFunctionContext.getArgument(\"PosY\");",
+            "const newZ = eventsFunctionContext.getArgument(\"PosZ\");",
+            "",
+            "if (runtimeScene._plane3DExtension.planes.has(planeIdentifier)) {",
+            "    const planeInfo = runtimeScene._plane3DExtension.planes.get(planeIdentifier);",
+            "    const plane = planeInfo.plane;",
+            "",
+            "    plane.position.set(newX, newY, newZ);",
+            "} else {",
+            "    console.error(\"Plane with the specified identifier not found.\");",
+            "}",
+            ""
+          ],
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": true
+        }
+      ],
+      "parameters": [
+        {
+          "description": "Identifier",
+          "name": "Identifier",
+          "type": "string"
+        },
+        {
+          "description": "X position",
+          "name": "PosX",
+          "type": "expression"
+        },
+        {
+          "description": "Y position",
+          "name": "PosY",
+          "type": "expression"
+        },
+        {
+          "description": "Z position",
+          "name": "PosZ",
+          "type": "expression"
+        }
+      ],
+      "objectGroups": []
+    },
+    {
+      "fullName": "Transform terrain",
+      "functionType": "Action",
+      "name": "Make_Mount",
+      "sentence": "Transform _PARAM1_ X: _PARAM2_, Y: _PARAM3_, Radius: _PARAM4_, Force: _PARAM5_",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "const planeIdentifier = eventsFunctionContext.getArgument(\"Identifier\");",
+            "",
+            "if (runtimeScene._plane3DExtension.planes.has(planeIdentifier)) {",
+            "    const planeInfo = runtimeScene._plane3DExtension.planes.get(planeIdentifier);",
+            "    const plane = planeInfo.plane;",
+            "",
+            "    const globalX = eventsFunctionContext.getArgument(\"PosX\");",
+            "    const globalY = eventsFunctionContext.getArgument(\"PosY\");",
+            "",
+            "    const planeGlobalPosition = new THREE.Vector3();",
+            "    plane.getWorldPosition(planeGlobalPosition);",
+            "",
+            "    const geometry = plane.geometry;",
+            "",
+            "    const vertices = geometry.attributes.position.array;",
+            "    const vertexCount = vertices.length / 3;",
+            "",
+            "    for (let i = 0; i < vertexCount; i++) {",
+            "        const vertexGlobalX = vertices[i * 3] + planeGlobalPosition.x;",
+            "        const vertexGlobalY = vertices[i * 3 + 1] - planeGlobalPosition.y;",
+            "",
+            "        const distance = Math.sqrt(Math.pow(vertexGlobalX - globalX, 2) + Math.pow(vertexGlobalY - globalY, 2));",
+            "",
+            "        const radius = eventsFunctionContext.getArgument(\"Radius\");",
+            "        const force = eventsFunctionContext.getArgument(\"Force\");",
+            "        const attenuation = Math.exp(-Math.pow(distance, 2) / (2 * Math.pow(radius, 2)));",
+            "",
+            "        vertices[i * 3 + 2] += force * attenuation;",
+            "    }",
+            "",
+            "    geometry.attributes.position.needsUpdate = true;",
+            "} else {",
+            "    console.error(\"Plane with the specified identifier not found.\");",
+            "}",
+            ""
+          ],
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": true
+        }
+      ],
+      "parameters": [
+        {
+          "description": "Identifier",
+          "name": "Identifier",
+          "type": "string"
+        },
+        {
+          "description": "X Position",
+          "name": "PosX",
+          "type": "expression"
+        },
+        {
+          "description": "Y Position",
+          "name": "PosY",
+          "type": "expression"
+        },
+        {
+          "description": "Radius",
+          "name": "Radius",
+          "type": "expression"
+        },
+        {
+          "description": "Force",
+          "name": "Force",
+          "type": "expression"
+        }
+      ],
+      "objectGroups": []
+    },
+    {
+      "fullName": "Set color along the z-axis",
+      "functionType": "Action",
+      "name": "SetZColor",
+      "sentence": "Set color _PARAM1_ Color: _PARAM2_, Z max: _PARAM3_, Z min: _PARAM4_",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "const planeIdentifier = eventsFunctionContext.getArgument(\"Identifier\");",
+            "",
+            "if (runtimeScene._plane3DExtension.planes.has(planeIdentifier)) {",
+            "    const planeInfo = runtimeScene._plane3DExtension.planes.get(planeIdentifier);",
+            "    const plane = planeInfo.plane;",
+            "",
+            "    const geometry = plane.geometry;",
+            "",
+            "    const originalColors = geometry.attributes.color.array;",
+            "",
+            "    const positions = geometry.attributes.position.array;",
+            "",
+            "    const rgbColorTop = gdjs.rgbOrHexToRGBColor(eventsFunctionContext.getArgument(\"ColorTop\"));",
+            "    const color = new THREE.Color(rgbColorTop[0] / 255, rgbColorTop[1] / 255, rgbColorTop[2] / 255);",
+            "",
+            "    const minZ = eventsFunctionContext.getArgument(\"MinZ\");",
+            "    const maxZ = eventsFunctionContext.getArgument(\"MaxZ\");",
+            "",
+            "    const numVertices = positions.length / 3;",
+            "",
+            "    for (let i = 0; i < numVertices; i++) {",
+            "        const colorIndex = i * 3;",
+            "        const z = positions[i * 3 + 2];",
+            "",
+            "        if (z >= minZ && z <= maxZ) {",
+            "            originalColors[colorIndex] = color.r;",
+            "            originalColors[colorIndex + 1] = color.g;",
+            "            originalColors[colorIndex + 2] = color.b;",
+            "        }",
+            "    }",
+            "",
+            "    geometry.attributes.color.needsUpdate = true;",
+            "",
+            "    const material = new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: false});",
+            "",
+            "    plane.material = material;",
+            "} else {",
+            "    console.error(\"Plane with the specified identifier not found.\");",
+            "}",
+            ""
+          ],
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": true
+        }
+      ],
+      "parameters": [
+        {
+          "description": "Identifier",
+          "name": "Identifier",
+          "type": "string"
+        },
+        {
+          "description": "Color",
+          "name": "ColorTop",
+          "type": "color"
+        },
+        {
+          "description": "Z max",
+          "name": "MaxZ",
+          "type": "expression"
+        },
+        {
+          "description": "Z min",
+          "name": "MinZ",
+          "type": "expression"
+        }
+      ],
+      "objectGroups": []
+    },
+    {
+      "description": "It is necessary to have an extension with light sources. Tested with Entropy extension",
+      "fullName": "Shadow options",
+      "functionType": "Action",
+      "name": "Shadow",
+      "sentence": "Set for _PARAM1_ Cast shadow: _PARAM2_, Receive shadow: _PARAM3_",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "const planeIdentifier = eventsFunctionContext.getArgument(\"Identifier\");",
+            "",
+            "if (runtimeScene._plane3DExtension.planes.has(planeIdentifier)) {",
+            "    const planeInfo = runtimeScene._plane3DExtension.planes.get(planeIdentifier);",
+            "    const plane = planeInfo.plane;",
+            "",
+            "    if (plane.geometry) {",
+            "        plane.receiveShadow = eventsFunctionContext.getArgument(\"ReceiveShadow\");",
+            "        plane.castShadow = eventsFunctionContext.getArgument(\"CastShadow\");",
+            "    }",
+            "} ",
+            ""
+          ],
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": true
+        }
+      ],
+      "parameters": [
+        {
+          "description": "Identifier",
+          "name": "Identifier",
+          "type": "string"
+        },
+        {
+          "defaultValue": "yes",
+          "description": "Cast Shadow",
+          "name": "CastShadow",
+          "optional": true,
+          "type": "yesorno"
+        },
+        {
+          "defaultValue": "yes",
+          "description": "Receive Shadow",
+          "name": "ReceiveShadow",
+          "optional": true,
+          "type": "yesorno"
+        }
+      ],
+      "objectGroups": []
+    },
+    {
+      "description": "Normalize vertices",
+      "fullName": "Normilize",
+      "functionType": "Action",
+      "name": "Normalize",
+      "sentence": "Normilize _PARAM1_",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "const planeIdentifier = eventsFunctionContext.getArgument(\"Identifier\");",
+            "",
+            "if (runtimeScene._plane3DExtension.planes.has(planeIdentifier)) {",
+            "    const planeInfo = runtimeScene._plane3DExtension.planes.get(planeIdentifier);",
+            "    const plane = planeInfo.plane;",
+            "",
+            "    const geometry = plane.geometry;",
+            "",
+            "    const positions = geometry.attributes.position.array;",
+            "",
+            "    for (let i = 2; i < positions.length; i += 3) {",
+            "        const z = positions[i];",
+            "        const prevZ = positions[i - 3] || z;",
+            "        const nextZ = positions[i + 3] || z;",
+            "        const avgZ = (prevZ + z + nextZ) / 3;",
+            "        positions[i] = avgZ;",
+            "    }",
+            "",
+            "    geometry.attributes.position.needsUpdate = true;",
+            "} else {",
+            "    console.error(\"Plane with the specified identifier not found.\");",
+            "}"
+          ],
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": true
+        }
+      ],
+      "parameters": [
+        {
+          "description": "Identifier",
+          "name": "Identifier",
+          "type": "string"
+        }
+      ],
+      "objectGroups": []
+    },
+    {
+      "fullName": "Get terrain X",
+      "functionType": "Expression",
+      "name": "XTerrain",
+      "sentence": "",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "const planeIdentifier = eventsFunctionContext.getArgument(\"Identifier\");",
+            "",
+            "if (runtimeScene._plane3DExtension.planes.has(planeIdentifier)) {",
+            "    const planeInfo = runtimeScene._plane3DExtension.planes.get(planeIdentifier);",
+            "    const plane = planeInfo.plane;",
+            "",
+            "    const planeGlobalPosition = new THREE.Vector3();",
+            "    plane.getWorldPosition(planeGlobalPosition);",
+            "",
+            "    eventsFunctionContext.returnValue = planeGlobalPosition.x;",
+            "} else {",
+            "    console.error(\"Plane with the specified identifier not found.\");",
+            "}",
+            ""
+          ],
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": true
+        }
+      ],
+      "expressionType": {
+        "type": "expression"
+      },
+      "parameters": [
+        {
+          "description": "Identifier",
+          "name": "Identifier",
+          "type": "string"
+        }
+      ],
+      "objectGroups": []
+    },
+    {
+      "fullName": "Get terrain Y",
+      "functionType": "Expression",
+      "name": "YTerrain",
+      "sentence": "",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "const planeIdentifier = eventsFunctionContext.getArgument(\"Identifier\");",
+            "",
+            "if (runtimeScene._plane3DExtension.planes.has(planeIdentifier)) {",
+            "    const planeInfo = runtimeScene._plane3DExtension.planes.get(planeIdentifier);",
+            "    const plane = planeInfo.plane;",
+            "",
+            "    const planeGlobalPosition = new THREE.Vector3();",
+            "    plane.getWorldPosition(planeGlobalPosition);",
+            "",
+            "    eventsFunctionContext.returnValue = planeGlobalPosition.y * -1;",
+            "} else {",
+            "    console.error(\"Plane with the specified identifier not found.\");",
+            "}",
+            ""
+          ],
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": true
+        }
+      ],
+      "expressionType": {
+        "type": "expression"
+      },
+      "parameters": [
+        {
+          "description": "Identifier",
+          "name": "Identifier",
+          "type": "string"
+        }
+      ],
+      "objectGroups": []
+    },
+    {
+      "fullName": "Get terrain Z",
+      "functionType": "Expression",
+      "name": "ZTerrain",
+      "sentence": "",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "const planeIdentifier = eventsFunctionContext.getArgument(\"Identifier\");",
+            "",
+            "if (runtimeScene._plane3DExtension.planes.has(planeIdentifier)) {",
+            "    const planeInfo = runtimeScene._plane3DExtension.planes.get(planeIdentifier);",
+            "    const plane = planeInfo.plane;",
+            "",
+            "    const planeGlobalPosition = new THREE.Vector3();",
+            "    plane.getWorldPosition(planeGlobalPosition);",
+            "",
+            "    eventsFunctionContext.returnValue = planeGlobalPosition.z;",
+            "} else {",
+            "    console.error(\"Plane with the specified identifier not found.\");",
+            "}",
+            ""
+          ],
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": true
+        }
+      ],
+      "expressionType": {
+        "type": "expression"
+      },
+      "parameters": [
+        {
+          "description": "Identifier",
+          "name": "Identifier",
+          "type": "string"
+        }
+      ],
+      "objectGroups": []
+    },
+    {
+      "description": "Returns the Z value of the nearest vertex to the specified point. Can be used for object interaction with the terrain",
+      "fullName": "Get Z position of near point",
+      "functionType": "Expression",
+      "name": "Z_near_point",
+      "sentence": "",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "const planeIdentifier = eventsFunctionContext.getArgument(\"Identifier\");",
+            "",
+            "if (runtimeScene._plane3DExtension.planes.has(planeIdentifier)) {",
+            "    const planeInfo = runtimeScene._plane3DExtension.planes.get(planeIdentifier);",
+            "    const plane = planeInfo.plane;",
+            "",
+            "    const planeGlobalPosition = new THREE.Vector3();",
+            "    plane.getWorldPosition(planeGlobalPosition);",
+            "",
+            "    const geometry = plane.geometry;",
+            "",
+            "    const posX = eventsFunctionContext.getArgument(\"PosX\");",
+            "    const posY = eventsFunctionContext.getArgument(\"PosY\");",
+            "",
+            "    const vertices = geometry.attributes.position.array;",
+            "    const vertexCount = vertices.length / 3;",
+            "",
+            "    let closestVertexIndex = -1;",
+            "    let closestDistanceSquared = Infinity;",
+            "",
+            "    for (let i = 0; i < vertexCount; i++) {",
+            "        const vertexX = vertices[i * 3] + planeGlobalPosition.x;",
+            "        const vertexY = vertices[i * 3 + 1] - planeGlobalPosition.y;",
+            "",
+            "        const distanceSquared = (posX - vertexX) ** 2 + (posY - vertexY) ** 2;",
+            "",
+            "        if (distanceSquared < closestDistanceSquared) {",
+            "            closestVertexIndex = i;",
+            "            closestDistanceSquared = distanceSquared;",
+            "        }",
+            "    }",
+            "",
+            "    if (closestVertexIndex !== -1) {",
+            "        const closestVertexZ = vertices[closestVertexIndex * 3 + 2];",
+            "        eventsFunctionContext.returnValue = closestVertexZ;",
+            "    } else {",
+            "        console.error(\"Failed to find the closest vertex.\");",
+            "    }",
+            "} else {",
+            "    console.error(\"Plane with the specified identifier not found.\");",
+            "}",
+            ""
+          ],
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": true
+        }
+      ],
+      "expressionType": {
+        "type": "expression"
+      },
+      "parameters": [
+        {
+          "description": "Identifier",
+          "name": "Identifier",
+          "type": "string"
+        },
+        {
+          "description": "TargetX",
+          "name": "PosX",
+          "type": "expression"
+        },
+        {
+          "description": "TargetY",
+          "name": "PosY",
+          "type": "expression"
+        }
+      ],
+      "objectGroups": []
+    },
+    {
+      "description": "Returns the total number of vertices",
+      "fullName": "Points Count",
+      "functionType": "Expression",
+      "name": "VertexsCount",
+      "sentence": "",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "const planeIdentifier = eventsFunctionContext.getArgument(\"Identifier\");",
+            "",
+            "if (runtimeScene._plane3DExtension.planes.has(planeIdentifier)) {",
+            "    const planeInfo = runtimeScene._plane3DExtension.planes.get(planeIdentifier);",
+            "    const plane = planeInfo.plane;",
+            "",
+            "    const geometry = plane.geometry;",
+            "",
+            "    if (geometry && geometry.attributes.position) {",
+            "        const positions = geometry.attributes.position.array;",
+            "",
+            "        const vertexCount = positions.length / 3;",
+            "",
+            "        eventsFunctionContext.returnValue = vertexCount;",
+            "    } else {",
+            "        eventsFunctionContext.returnValue = -1;",
+            "    }",
+            "} else {",
+            "    eventsFunctionContext.returnValue = -1;",
+            "}",
+            ""
+          ],
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": false
+        }
+      ],
+      "expressionType": {
+        "type": "expression"
+      },
+      "parameters": [
+        {
+          "description": "Identifier",
+          "name": "Identifier",
+          "type": "string"
+        }
+      ],
+      "objectGroups": []
+    }
+  ],
+  "eventsBasedBehaviors": [],
+  "eventsBasedObjects": []
+}
