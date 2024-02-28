@@ -8,7 +8,7 @@
   "name": "Physics3D",
   "previewIconUrl": "https://asset-resources.gdevelop.io/public-resources/Icons/3989033c8ae00d45cb3201d29fbee4271866b16ea733e3c7cf10c322415a1cc7_drawing-box.svg",
   "shortDescription": "",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "tags": [],
   "authorIds": [
@@ -14144,17 +14144,17 @@
           "type": "string"
         },
         {
-          "description": "X offset (Default 0 (Object point))",
+          "description": "X",
           "name": "X",
           "type": "expression"
         },
         {
-          "description": "Y offset (Default 0 (Object point))",
+          "description": "Y",
           "name": "Y",
           "type": "expression"
         },
         {
-          "description": "Z offset (Default 0 (Object point))",
+          "description": "Z",
           "name": "Z",
           "type": "expression"
         },
@@ -14171,6 +14171,125 @@
         {
           "description": "Depth",
           "name": "Depth",
+          "type": "expression"
+        },
+        {
+          "description": "Rotation X",
+          "name": "Rotation_X",
+          "type": "expression"
+        },
+        {
+          "description": "Rotation Y",
+          "name": "Rotation_Y",
+          "type": "expression"
+        },
+        {
+          "description": "Rotation Z",
+          "name": "Rotation_Z",
+          "type": "expression"
+        },
+        {
+          "description": "Visible",
+          "name": "Visible",
+          "type": "trueorfalse"
+        }
+      ],
+      "objectGroups": []
+    },
+    {
+      "description": "Create an infinite plane (floor, walls, ceiling).",
+      "fullName": "Create an infinite plane ",
+      "functionType": "Action",
+      "name": "CreatePlane",
+      "sentence": "Create plane _PARAM1_ X: _PARAM2_, Y: _PARAM3_, Z: _PARAM4_, Width: _PARAM5_, Height: _PARAM6_, RotX: _PARAM7_, RotY: _PARAM8_, RotZ: _PARAM9_, Visible: _PARAM10_",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "const CANNON = gdjs._3DphysicsExt.get(\"CannonJS\");",
+            "const scene = runtimeScene.getLayer('').getRenderer().getThreeScene();",
+            "const world = runtimeScene._CannonJS.world;",
+            "",
+            "const visible = eventsFunctionContext.getArgument(\"Visible\");",
+            "",
+            "const posX = eventsFunctionContext.getArgument(\"X\");",
+            "const posY = eventsFunctionContext.getArgument(\"Y\");",
+            "const posZ = eventsFunctionContext.getArgument(\"Z\");",
+            "",
+            "const width = eventsFunctionContext.getArgument(\"Width\")/2;",
+            "const height = eventsFunctionContext.getArgument(\"Height\")/2;",
+            "",
+            "const angleX = eventsFunctionContext.getArgument(\"Rotation_X\") * (Math.PI / 180);",
+            "const angleY = eventsFunctionContext.getArgument(\"Rotation_Y\") * (Math.PI / 180); ",
+            "const angleZ = eventsFunctionContext.getArgument(\"Rotation_Z\") * (Math.PI / 180); ",
+            "const quaternion = new CANNON.Quaternion();",
+            "quaternion.setFromEuler(angleX, angleY, angleZ);",
+            "",
+            "",
+            "const planeShape = new CANNON.Plane();",
+            "const planeBody = new CANNON.Body({ mass: 0 });",
+            "",
+            "planeBody.position.set(posX, posY, posZ);",
+            "planeBody.quaternion.copy(quaternion);",
+            "",
+            "const planeMaterial = new CANNON.Material();",
+            "planeMaterial.friction = 1;",
+            "",
+            "planeBody.material = planeMaterial;",
+            "planeBody.addShape(planeShape);",
+            "",
+            "world.addBody(planeBody);",
+            "",
+            "const planeGeometry = new THREE.PlaneGeometry(width, height);",
+            "const rgbColor = new THREE.Color(\"#ff0000\");",
+            "",
+            "const material = new THREE.MeshBasicMaterial({ ",
+            "    color: rgbColor, ",
+            "    wireframe: true,",
+            "    visible: visible",
+            "});",
+            "const debugMesh = new THREE.Mesh(planeGeometry, material);",
+            "",
+            "debugMesh.position.set(posX, posY, posZ);",
+            "debugMesh.quaternion.copy(quaternion);",
+            "",
+            "scene.add(debugMesh);",
+            ""
+          ],
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": true
+        }
+      ],
+      "parameters": [
+        {
+          "description": "Identifier",
+          "name": "Identifier",
+          "type": "string"
+        },
+        {
+          "description": "X",
+          "name": "X",
+          "type": "expression"
+        },
+        {
+          "description": "Y",
+          "name": "Y",
+          "type": "expression"
+        },
+        {
+          "description": "Z",
+          "name": "Z",
+          "type": "expression"
+        },
+        {
+          "description": "Width (The plane is infinite. This is only used for visualization).",
+          "name": "Width",
+          "type": "expression"
+        },
+        {
+          "description": "Height(The plane is infinite. This is only used for visualization).",
+          "name": "Height",
           "type": "expression"
         },
         {
