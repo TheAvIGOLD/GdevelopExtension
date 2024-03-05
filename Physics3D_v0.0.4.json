@@ -14785,8 +14785,8 @@
   "eventsBasedBehaviors": [
     {
       "description": "Behavior enabling the creation of physical colliders for 3D objects.",
-      "fullName": "Object collider",
-      "name": "ObjectCollider",
+      "fullName": "Physics3D",
+      "name": "Physics3D",
       "objectType": "Scene3D::Model3DObject",
       "eventsFunctions": [
         {
@@ -14822,7 +14822,7 @@
             {
               "description": "Behavior",
               "name": "Behavior",
-              "supplementaryInformation": "Physics3D::ObjectCollider",
+              "supplementaryInformation": "Physics3D::Physics3D",
               "type": "behavior"
             }
           ],
@@ -14947,7 +14947,7 @@
             {
               "description": "Behavior",
               "name": "Behavior",
-              "supplementaryInformation": "Physics3D::ObjectCollider",
+              "supplementaryInformation": "Physics3D::Physics3D",
               "type": "behavior"
             },
             {
@@ -15096,7 +15096,7 @@
             {
               "description": "Behavior",
               "name": "Behavior",
-              "supplementaryInformation": "Physics3D::ObjectCollider",
+              "supplementaryInformation": "Physics3D::Physics3D",
               "type": "behavior"
             },
             {
@@ -15242,7 +15242,7 @@
             {
               "description": "Behavior",
               "name": "Behavior",
-              "supplementaryInformation": "Physics3D::ObjectCollider",
+              "supplementaryInformation": "Physics3D::Physics3D",
               "type": "behavior"
             },
             {
@@ -15407,7 +15407,7 @@
             {
               "description": "Behavior",
               "name": "Behavior",
-              "supplementaryInformation": "Physics3D::ObjectCollider",
+              "supplementaryInformation": "Physics3D::Physics3D",
               "type": "behavior"
             },
             {
@@ -15490,7 +15490,7 @@
             {
               "description": "Behavior",
               "name": "Behavior",
-              "supplementaryInformation": "Physics3D::ObjectCollider",
+              "supplementaryInformation": "Physics3D::Physics3D",
               "type": "behavior"
             },
             {
@@ -15552,7 +15552,7 @@
             {
               "description": "Behavior",
               "name": "Behavior",
-              "supplementaryInformation": "Physics3D::ObjectCollider",
+              "supplementaryInformation": "Physics3D::Physics3D",
               "type": "behavior"
             },
             {
@@ -15607,7 +15607,7 @@
             {
               "description": "Behavior",
               "name": "Behavior",
-              "supplementaryInformation": "Physics3D::ObjectCollider",
+              "supplementaryInformation": "Physics3D::Physics3D",
               "type": "behavior"
             },
             {
@@ -15652,7 +15652,7 @@
             {
               "description": "Behavior",
               "name": "Behavior",
-              "supplementaryInformation": "Physics3D::ObjectCollider",
+              "supplementaryInformation": "Physics3D::Physics3D",
               "type": "behavior"
             },
             {
@@ -15697,7 +15697,7 @@
             {
               "description": "Behavior",
               "name": "Behavior",
-              "supplementaryInformation": "Physics3D::ObjectCollider",
+              "supplementaryInformation": "Physics3D::Physics3D",
               "type": "behavior"
             },
             {
@@ -15743,7 +15743,7 @@
             {
               "description": "Behavior",
               "name": "Behavior",
-              "supplementaryInformation": "Physics3D::ObjectCollider",
+              "supplementaryInformation": "Physics3D::Physics3D",
               "type": "behavior"
             },
             {
@@ -15796,7 +15796,7 @@
             {
               "description": "Behavior",
               "name": "Behavior",
-              "supplementaryInformation": "Physics3D::ObjectCollider",
+              "supplementaryInformation": "Physics3D::Physics3D",
               "type": "behavior"
             },
             {
@@ -15839,7 +15839,7 @@
             {
               "description": "Behavior",
               "name": "Behavior",
-              "supplementaryInformation": "Physics3D::ObjectCollider",
+              "supplementaryInformation": "Physics3D::Physics3D",
               "type": "behavior"
             },
             {
@@ -15882,7 +15882,7 @@
             {
               "description": "Behavior",
               "name": "Behavior",
-              "supplementaryInformation": "Physics3D::ObjectCollider",
+              "supplementaryInformation": "Physics3D::Physics3D",
               "type": "behavior"
             },
             {
@@ -15927,7 +15927,7 @@
             {
               "description": "Behavior",
               "name": "Behavior",
-              "supplementaryInformation": "Physics3D::ObjectCollider",
+              "supplementaryInformation": "Physics3D::Physics3D",
               "type": "behavior"
             }
           ],
@@ -15978,7 +15978,7 @@
             {
               "description": "Behavior",
               "name": "Behavior",
-              "supplementaryInformation": "Physics3D::ObjectCollider",
+              "supplementaryInformation": "Physics3D::Physics3D",
               "type": "behavior"
             },
             {
@@ -16078,7 +16078,7 @@
             {
               "description": "Behavior",
               "name": "Behavior",
-              "supplementaryInformation": "Physics3D::ObjectCollider",
+              "supplementaryInformation": "Physics3D::Physics3D",
               "type": "behavior"
             },
             {
@@ -16172,7 +16172,7 @@
             {
               "description": "Behavior",
               "name": "Behavior",
-              "supplementaryInformation": "Physics3D::ObjectCollider",
+              "supplementaryInformation": "Physics3D::Physics3D",
               "type": "behavior"
             }
           ],
@@ -16213,7 +16213,7 @@
             {
               "description": "Behavior",
               "name": "Behavior",
-              "supplementaryInformation": "Physics3D::ObjectCollider",
+              "supplementaryInformation": "Physics3D::Physics3D",
               "type": "behavior"
             }
           ],
@@ -16254,7 +16254,7 @@
             {
               "description": "Behavior",
               "name": "Behavior",
-              "supplementaryInformation": "Physics3D::ObjectCollider",
+              "supplementaryInformation": "Physics3D::Physics3D",
               "type": "behavior"
             }
           ],
