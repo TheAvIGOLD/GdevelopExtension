@@ -8,7 +8,7 @@
   "name": "Physics3D",
   "previewIconUrl": "https://asset-resources.gdevelop.io/public-resources/Icons/3989033c8ae00d45cb3201d29fbee4271866b16ea733e3c7cf10c322415a1cc7_drawing-box.svg",
   "shortDescription": "",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "",
   "tags": [
     "3D"
@@ -24,6 +24,17 @@
       "name": "onSceneLoaded",
       "sentence": "",
       "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "runtimeScene._physics3D = {};",
+            "runtimeScene._physics3D.colliders = new Map();",
+            ""
+          ],
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": false
+        },
         {
           "colorB": 228,
           "colorG": 176,
@@ -13764,7 +13775,13 @@
                 "const scene = renderer.getThreeScene();",
                 "",
                 "const world = new CANNON.World();",
+                "world.allowSleep = true",
+                "world.broadphase = new CANNON.NaiveBroadphase(); // Выбор алгоритма для обнаружения столкновений",
+                "world.solver.iterations = 10; // Количество итераций для решения столкновений",
                 "world.gravity.set(0, 0, -100);",
+                "",
+                "const fixedTimeStep = 0.5 / 60.0;",
+                "const maxSubSteps = 6;",
                 "",
                 "",
                 "const physicsMaterial = new CANNON.Material(\"slipperyMaterial\");",
@@ -13777,9 +13794,14 @@
                 "};",
                 "",
                 "function animate() {",
-                "    requestAnimationFrame(animate);",
                 "    ",
-                "    world.step(1 / 60);",
+                "    ",
+                "     const deltaTime = runtimeScene.getTimeManager().getElapsedTime(); ",
+                "     const roundedDeltaTime = Math.round(deltaTime * 100) / 100;",
+                "     console.log(deltaTime);",
+                "",
+                "    // Обновление мира с использованием адаптивной синхронизации времени",
+                "    world.step(fixedTimeStep, roundedDeltaTime, maxSubSteps);",
                 "",
                 "    runtimeScene._CannonJS.objects.forEach(function(obj) {",
                 "        const object = obj.object;",
@@ -13790,6 +13812,7 @@
                 "            object.setZ(obj.body.position.z);",
                 "            object.get3DRendererObject().quaternion.copy(body.quaternion);",
                 "    });",
+                "    requestAnimationFrame(animate);",
                 "}",
                 "",
                 "animate();",
@@ -13810,6 +13833,7 @@
       "description": "Create wall",
       "fullName": "Create wall ",
       "functionType": "Action",
+      "group": "Wall collider",
       "name": "CreateWall",
       "sentence": "Create wall _PARAM1_ X: _PARAM2_, Y: _PARAM3_, Z: _PARAM4_, Width: _PARAM5_, Height: _PARAM6_, Depth: _PARAM7_, RotX: _PARAM8_, RotY: _PARAM9_, RotZ: _PARAM10_, Visible: _PARAM11_",
       "events": [
@@ -13821,6 +13845,8 @@
             "const world = runtimeScene._CannonJS.world;",
             "",
             "const visible = eventsFunctionContext.getArgument(\"Visible\");",
+            "",
+            "const identifier = eventsFunctionContext.getArgument(\"Identifier\");",
             "",
             "const posX = eventsFunctionContext.getArgument(\"X\");",
             "const posY = eventsFunctionContext.getArgument(\"Y\");",
@@ -13869,6 +13895,10 @@
             "",
             "",
             "    scene.add(debugMesh);",
+            "    runtimeScene._physics3D.colliders.set(identifier, { ",
+            "        collider:  boxBody,",
+            "        mesh: debugMesh",
+            "        });",
             ""
           ],
           "parameterObjects": "",
@@ -13883,17 +13913,17 @@
           "type": "string"
         },
         {
-          "description": "X",
+          "description": "Position X",
           "name": "X",
           "type": "expression"
         },
         {
-          "description": "Y",
+          "description": "Position Y",
           "name": "Y",
           "type": "expression"
         },
         {
-          "description": "Z",
+          "description": "Position Z",
           "name": "Z",
           "type": "expression"
         },
@@ -13931,6 +13961,418 @@
           "description": "Visible",
           "name": "Visible",
           "type": "trueorfalse"
+        }
+      ],
+      "objectGroups": []
+    },
+    {
+      "description": "Set wall position",
+      "fullName": "Set wall position",
+      "functionType": "Action",
+      "group": "Wall collider",
+      "name": "SetWallPosition",
+      "sentence": "Set _PARAM1_ wall position X: _PARAM2_, Y: _PARAM3_, Z: _PARAM4_",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "const identifier = eventsFunctionContext.getArgument(\"Identifier\");",
+            "",
+            "const newX = eventsFunctionContext.getArgument(\"X\");",
+            "const newY = eventsFunctionContext.getArgument(\"Y\");",
+            "const newZ = eventsFunctionContext.getArgument(\"Z\");",
+            "",
+            "if (runtimeScene._physics3D.colliders.has(identifier)) {",
+            "    const colliderInfo = runtimeScene._physics3D.colliders.get(identifier);",
+            "    const body = colliderInfo.collider;",
+            "    const mesh = colliderInfo.mesh;",
+            "    ",
+            "",
+            "    body.position.set(newX, newY, newZ);",
+            "    mesh.position.set(newX, newY, newZ);",
+            "}",
+            ""
+          ],
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": true
+        }
+      ],
+      "parameters": [
+        {
+          "description": "Identifier",
+          "name": "Identifier",
+          "type": "string"
+        },
+        {
+          "description": "X position",
+          "name": "X",
+          "type": "expression"
+        },
+        {
+          "description": "Y position",
+          "name": "Y",
+          "type": "expression"
+        },
+        {
+          "description": "Z position",
+          "name": "Z",
+          "type": "expression"
+        }
+      ],
+      "objectGroups": []
+    },
+    {
+      "description": "Set wall X position",
+      "fullName": "Set wall X position",
+      "functionType": "Action",
+      "group": "Wall collider",
+      "name": "SetWallPositionX",
+      "sentence": "Set _PARAM1_ wall position X _PARAM2_",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "const identifier = eventsFunctionContext.getArgument(\"Identifier\");",
+            "",
+            "const newX = eventsFunctionContext.getArgument(\"X\");",
+            "",
+            "if (runtimeScene._physics3D.colliders.has(identifier)) {",
+            "    const colliderInfo = runtimeScene._physics3D.colliders.get(identifier);",
+            "    const body = colliderInfo.collider;",
+            "    const mesh = colliderInfo.mesh;",
+            "    ",
+            "",
+            "    body.position.x = newX;",
+            "    mesh.position.x = newX;",
+            "}",
+            ""
+          ],
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": true
+        }
+      ],
+      "parameters": [
+        {
+          "description": "Identifier",
+          "name": "Identifier",
+          "type": "string"
+        },
+        {
+          "description": "Value",
+          "name": "X",
+          "type": "expression"
+        }
+      ],
+      "objectGroups": []
+    },
+    {
+      "description": "Set wall Y position",
+      "fullName": "Set wall Y position",
+      "functionType": "Action",
+      "group": "Wall collider",
+      "name": "SetWallPositionY",
+      "sentence": "Set _PARAM1_ wall position Y _PARAM2_",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "const identifier = eventsFunctionContext.getArgument(\"Identifier\");",
+            "",
+            "const newY = eventsFunctionContext.getArgument(\"Y\");",
+            "",
+            "if (runtimeScene._physics3D.colliders.has(identifier)) {",
+            "    const colliderInfo = runtimeScene._physics3D.colliders.get(identifier);",
+            "    const body = colliderInfo.collider;",
+            "    const mesh = colliderInfo.mesh;",
+            "    ",
+            "",
+            "    body.position.y = newY;",
+            "    mesh.position.y = newY;",
+            "}",
+            ""
+          ],
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": true
+        }
+      ],
+      "parameters": [
+        {
+          "description": "Identifier",
+          "name": "Identifier",
+          "type": "string"
+        },
+        {
+          "description": "Value",
+          "name": "Y",
+          "type": "expression"
+        }
+      ],
+      "objectGroups": []
+    },
+    {
+      "description": "Set wall Z position",
+      "fullName": "Set wall Z position",
+      "functionType": "Action",
+      "group": "Wall collider",
+      "name": "SetWallPositionZ",
+      "sentence": "Set _PARAM1_ wall position Z _PARAM2_",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "const identifier = eventsFunctionContext.getArgument(\"Identifier\");",
+            "",
+            "const newZ = eventsFunctionContext.getArgument(\"Z\");",
+            "",
+            "if (runtimeScene._physics3D.colliders.has(identifier)) {",
+            "    const colliderInfo = runtimeScene._physics3D.colliders.get(identifier);",
+            "    const body = colliderInfo.collider;",
+            "    const mesh = colliderInfo.mesh;",
+            "    ",
+            "",
+            "    body.position.z = newZ;",
+            "    mesh.position.z = newZ;",
+            "}",
+            ""
+          ],
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": true
+        }
+      ],
+      "parameters": [
+        {
+          "description": "Identifier",
+          "name": "Identifier",
+          "type": "string"
+        },
+        {
+          "description": "Value",
+          "name": "Z",
+          "type": "expression"
+        }
+      ],
+      "objectGroups": []
+    },
+    {
+      "description": "Set wall rotation",
+      "fullName": "Set wall rotation",
+      "functionType": "Action",
+      "group": "Wall collider",
+      "name": "SetWallRotation",
+      "sentence": "Set _PARAM1_ wall rotation X: _PARAM2_, Y: _PARAM3_, Z: _PARAM4_",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "const identifier = eventsFunctionContext.getArgument(\"Identifier\");",
+            "",
+            "const angleX = eventsFunctionContext.getArgument(\"RotationX\") * (Math.PI / 180);",
+            "const angleY = eventsFunctionContext.getArgument(\"RotationY\") * (Math.PI / 180); ",
+            "const angleZ = eventsFunctionContext.getArgument(\"RotationZ\") * (Math.PI / 180); ",
+            "",
+            "const quaternion = new CANNON.Quaternion();",
+            "quaternion.setFromEuler(angleX, angleY, angleZ);",
+            "",
+            "",
+            "if (runtimeScene._physics3D.colliders.has(identifier)) {",
+            "    const colliderInfo = runtimeScene._physics3D.colliders.get(identifier);",
+            "    const body = colliderInfo.collider;",
+            "    const mesh = colliderInfo.mesh;",
+            "    ",
+            "",
+            "    body.quaternion.copy(quaternion);",
+            "    mesh.quaternion.copy(quaternion);",
+            "}",
+            ""
+          ],
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": true
+        }
+      ],
+      "parameters": [
+        {
+          "description": "Identifier",
+          "name": "Identifier",
+          "type": "string"
+        },
+        {
+          "description": "Rotation X",
+          "name": "RotationX",
+          "type": "expression"
+        },
+        {
+          "description": "Rotation Y",
+          "name": "RotationY",
+          "type": "expression"
+        },
+        {
+          "description": "Rotation Z",
+          "name": "RotationZ",
+          "type": "expression"
+        }
+      ],
+      "objectGroups": []
+    },
+    {
+      "description": "Set wall X rotation",
+      "fullName": "Set wall X rotation",
+      "functionType": "Action",
+      "group": "Wall collider",
+      "name": "SetWallRotationX",
+      "sentence": "Set _PARAM1_ wall rotation X _PARAM2_",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "const identifier = eventsFunctionContext.getArgument(\"Identifier\");",
+            "const angleX = eventsFunctionContext.getArgument(\"RotationX\") * (Math.PI / 180);",
+            "",
+            "if (runtimeScene._physics3D.colliders.has(identifier)) {",
+            "    const colliderInfo = runtimeScene._physics3D.colliders.get(identifier);",
+            "    const body = colliderInfo.collider;",
+            "    const mesh = colliderInfo.mesh;",
+            "",
+            "    const currentEuler = new THREE.Euler().setFromQuaternion(mesh.quaternion, 'XYZ');",
+            "    const currentAngleY = currentEuler.y;",
+            "    const currentAngleZ = currentEuler.z;",
+            "",
+            "    const quaternionX = new CANNON.Quaternion();",
+            "    quaternionX.setFromEuler(angleX, 0, 0);",
+            "",
+            "    const quaternion = new CANNON.Quaternion();",
+            "    quaternion.setFromEuler(angleX, currentAngleY, currentAngleZ);",
+            "",
+            "    body.quaternion.copy(quaternion);",
+            "    mesh.quaternion.copy(quaternion);",
+            "}",
+            ""
+          ],
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": true
+        }
+      ],
+      "parameters": [
+        {
+          "description": "Identifier",
+          "name": "Identifier",
+          "type": "string"
+        },
+        {
+          "description": "Value",
+          "name": "RotationX",
+          "type": "expression"
+        }
+      ],
+      "objectGroups": []
+    },
+    {
+      "description": "Set wall Y rotation",
+      "fullName": "Set wall Y rotation",
+      "functionType": "Action",
+      "group": "Wall collider",
+      "name": "SetWallRotationY",
+      "sentence": "Set _PARAM1_ wall rotation Y _PARAM2_",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "const identifier = eventsFunctionContext.getArgument(\"Identifier\");",
+            "const angleY = eventsFunctionContext.getArgument(\"RotationY\") * (Math.PI / 180);",
+            "",
+            "if (runtimeScene._physics3D.colliders.has(identifier)) {",
+            "    const colliderInfo = runtimeScene._physics3D.colliders.get(identifier);",
+            "    const body = colliderInfo.collider;",
+            "    const mesh = colliderInfo.mesh;",
+            "",
+            "    const currentEuler = new THREE.Euler().setFromQuaternion(mesh.quaternion, 'XYZ');",
+            "    const currentAngleX = currentEuler.x;",
+            "    const currentAngleZ = currentEuler.z;",
+            "",
+            "    const quaternionY = new CANNON.Quaternion();",
+            "    quaternionY.setFromEuler(0, angleY, 0);",
+            "",
+            "    const quaternion = new CANNON.Quaternion();",
+            "    quaternion.setFromEuler(currentAngleX, angleY, currentAngleZ);",
+            "",
+            "    body.quaternion.copy(quaternion);",
+            "    mesh.quaternion.copy(quaternion);",
+            "}",
+            ""
+          ],
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": true
+        }
+      ],
+      "parameters": [
+        {
+          "description": "Identifier",
+          "name": "Identifier",
+          "type": "string"
+        },
+        {
+          "description": "Value",
+          "name": "RotationY",
+          "type": "expression"
+        }
+      ],
+      "objectGroups": []
+    },
+    {
+      "description": "Set wall Z rotation",
+      "fullName": "Set wall Z rotation",
+      "functionType": "Action",
+      "group": "Wall collider",
+      "name": "SetWallRotationZ",
+      "sentence": "Set _PARAM1_ wall rotation Z _PARAM2_",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "const identifier = eventsFunctionContext.getArgument(\"Identifier\");",
+            "const angleZ = eventsFunctionContext.getArgument(\"RotationZ\") * (Math.PI / 180);",
+            "",
+            "if (runtimeScene._physics3D.colliders.has(identifier)) {",
+            "    const colliderInfo = runtimeScene._physics3D.colliders.get(identifier);",
+            "    const body = colliderInfo.collider;",
+            "    const mesh = colliderInfo.mesh;",
+            "",
+            "    const currentEuler = new THREE.Euler().setFromQuaternion(mesh.quaternion, 'XYZ');",
+            "    const currentAngleX = currentEuler.x;",
+            "    const currentAngleY = currentEuler.y;",
+            "",
+            "    const quaternionY = new CANNON.Quaternion();",
+            "    quaternionY.setFromEuler(0, 0, angleZ);",
+            "",
+            "    const quaternion = new CANNON.Quaternion();",
+            "    quaternion.setFromEuler(currentAngleX, currentAngleY, angleZ);",
+            "",
+            "    body.quaternion.copy(quaternion);",
+            "    mesh.quaternion.copy(quaternion);",
+            "}",
+            ""
+          ],
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": true
+        }
+      ],
+      "parameters": [
+        {
+          "description": "Identifier",
+          "name": "Identifier",
+          "type": "string"
+        },
+        {
+          "description": "Value",
+          "name": "RotationZ",
+          "type": "expression"
         }
       ],
       "objectGroups": []
@@ -14098,13 +14540,253 @@
         }
       ],
       "objectGroups": []
+    },
+    {
+      "description": "Get wall X position",
+      "fullName": "Get wall X position",
+      "functionType": "Expression",
+      "group": "Wall position",
+      "name": "WallXPosition",
+      "sentence": "",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "const identifier = eventsFunctionContext.getArgument(\"Identifier\");",
+            "",
+            "if (runtimeScene._physics3D.colliders.has(identifier)) {",
+            "    const colliderInfo = runtimeScene._physics3D.colliders.get(identifier);",
+            "    const body = colliderInfo.collider;",
+            "    ",
+            "    eventsFunctionContext.returnValue = body.position.x;",
+            "}",
+            ""
+          ],
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": true
+        }
+      ],
+      "expressionType": {
+        "type": "expression"
+      },
+      "parameters": [
+        {
+          "description": "Identifier",
+          "name": "Identifier",
+          "type": "string"
+        }
+      ],
+      "objectGroups": []
+    },
+    {
+      "description": "Get wall Y position",
+      "fullName": "Get wall Y position",
+      "functionType": "Expression",
+      "group": "Wall position",
+      "name": "WallYPosition",
+      "sentence": "",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "const identifier = eventsFunctionContext.getArgument(\"Identifier\");",
+            "",
+            "if (runtimeScene._physics3D.colliders.has(identifier)) {",
+            "    const colliderInfo = runtimeScene._physics3D.colliders.get(identifier);",
+            "    const body = colliderInfo.collider;",
+            "    ",
+            "    eventsFunctionContext.returnValue = body.position.y;",
+            "}",
+            ""
+          ],
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": true
+        }
+      ],
+      "expressionType": {
+        "type": "expression"
+      },
+      "parameters": [
+        {
+          "description": "Identifier",
+          "name": "Identifier",
+          "type": "string"
+        }
+      ],
+      "objectGroups": []
+    },
+    {
+      "description": "Get wall Z position",
+      "fullName": "Get wall Z position",
+      "functionType": "Expression",
+      "group": "Wall position",
+      "name": "WallZPosition",
+      "sentence": "",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "const identifier = eventsFunctionContext.getArgument(\"Identifier\");",
+            "",
+            "if (runtimeScene._physics3D.colliders.has(identifier)) {",
+            "    const colliderInfo = runtimeScene._physics3D.colliders.get(identifier);",
+            "    const body = colliderInfo.collider;",
+            "    ",
+            "    eventsFunctionContext.returnValue = body.position.z;",
+            "}",
+            ""
+          ],
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": true
+        }
+      ],
+      "expressionType": {
+        "type": "expression"
+      },
+      "parameters": [
+        {
+          "description": "Identifier",
+          "name": "Identifier",
+          "type": "string"
+        }
+      ],
+      "objectGroups": []
+    },
+    {
+      "description": "Get wall X rotation",
+      "fullName": "Get wall X rotation",
+      "functionType": "Expression",
+      "group": "Wall rotation",
+      "name": "WallXRotation",
+      "sentence": "",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "const identifier = eventsFunctionContext.getArgument(\"Identifier\");",
+            "",
+            "if (runtimeScene._physics3D.colliders.has(identifier)) {",
+            "    const colliderInfo = runtimeScene._physics3D.colliders.get(identifier);",
+            "    const body = colliderInfo.collider;",
+            "    const mesh = colliderInfo.mesh;",
+            "    ",
+            "    const euler = new THREE.Euler().setFromQuaternion(mesh.quaternion, 'XYZ');",
+            "",
+            "    const rotationXInDegrees = THREE.MathUtils.radToDeg(euler.x);",
+            "",
+            "    eventsFunctionContext.returnValue = rotationXInDegrees;",
+            "}"
+          ],
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": true
+        }
+      ],
+      "expressionType": {
+        "type": "expression"
+      },
+      "parameters": [
+        {
+          "description": "Identifier",
+          "name": "Identifier",
+          "type": "string"
+        }
+      ],
+      "objectGroups": []
+    },
+    {
+      "description": "Get wall Y rotation",
+      "fullName": "Get wall Y rotation",
+      "functionType": "Expression",
+      "group": "Wall rotation",
+      "name": "WallYRotation",
+      "sentence": "",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "const identifier = eventsFunctionContext.getArgument(\"Identifier\");",
+            "",
+            "if (runtimeScene._physics3D.colliders.has(identifier)) {",
+            "    const colliderInfo = runtimeScene._physics3D.colliders.get(identifier);",
+            "    const body = colliderInfo.collider;",
+            "    const mesh = colliderInfo.mesh;",
+            "    ",
+            "    const euler = new THREE.Euler().setFromQuaternion(mesh.quaternion, 'XYZ');",
+            "",
+            "    const rotationYInDegrees = THREE.MathUtils.radToDeg(euler.y);",
+            "",
+            "    eventsFunctionContext.returnValue = rotationYInDegrees;",
+            "}"
+          ],
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": true
+        }
+      ],
+      "expressionType": {
+        "type": "expression"
+      },
+      "parameters": [
+        {
+          "description": "Identifier",
+          "name": "Identifier",
+          "type": "string"
+        }
+      ],
+      "objectGroups": []
+    },
+    {
+      "description": "Get wall Z rotation",
+      "fullName": "Get wall Z rotation",
+      "functionType": "Expression",
+      "group": "Wall rotation",
+      "name": "WallZRotation",
+      "sentence": "",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "const identifier = eventsFunctionContext.getArgument(\"Identifier\");",
+            "",
+            "if (runtimeScene._physics3D.colliders.has(identifier)) {",
+            "    const colliderInfo = runtimeScene._physics3D.colliders.get(identifier);",
+            "    const body = colliderInfo.collider;",
+            "    const mesh = colliderInfo.mesh;",
+            "    ",
+            "    const euler = new THREE.Euler().setFromQuaternion(mesh.quaternion, 'XYZ');",
+            "",
+            "    const rotationZInDegrees = THREE.MathUtils.radToDeg(euler.z);",
+            "",
+            "    eventsFunctionContext.returnValue = rotationZInDegrees;",
+            "}"
+          ],
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": true
+        }
+      ],
+      "expressionType": {
+        "type": "expression"
+      },
+      "parameters": [
+        {
+          "description": "Identifier",
+          "name": "Identifier",
+          "type": "string"
+        }
+      ],
+      "objectGroups": []
     }
   ],
   "eventsBasedBehaviors": [
     {
       "description": "Behavior enabling the creation of physical colliders for 3D objects.",
-      "fullName": "Physics 3D",
-      "name": "Physics3D",
+      "fullName": "Object collider",
+      "name": "ObjectCollider",
       "objectType": "Scene3D::Model3DObject",
       "eventsFunctions": [
         {
@@ -14140,7 +14822,7 @@
             {
               "description": "Behavior",
               "name": "Behavior",
-              "supplementaryInformation": "Physics3D::Physics3D",
+              "supplementaryInformation": "Physics3D::ObjectCollider",
               "type": "behavior"
             }
           ],
@@ -14265,7 +14947,7 @@
             {
               "description": "Behavior",
               "name": "Behavior",
-              "supplementaryInformation": "Physics3D::Physics3D",
+              "supplementaryInformation": "Physics3D::ObjectCollider",
               "type": "behavior"
             },
             {
@@ -14414,7 +15096,7 @@
             {
               "description": "Behavior",
               "name": "Behavior",
-              "supplementaryInformation": "Physics3D::Physics3D",
+              "supplementaryInformation": "Physics3D::ObjectCollider",
               "type": "behavior"
             },
             {
@@ -14560,7 +15242,7 @@
             {
               "description": "Behavior",
               "name": "Behavior",
-              "supplementaryInformation": "Physics3D::Physics3D",
+              "supplementaryInformation": "Physics3D::ObjectCollider",
               "type": "behavior"
             },
             {
@@ -14725,7 +15407,7 @@
             {
               "description": "Behavior",
               "name": "Behavior",
-              "supplementaryInformation": "Physics3D::Physics3D",
+              "supplementaryInformation": "Physics3D::ObjectCollider",
               "type": "behavior"
             },
             {
@@ -14808,7 +15490,7 @@
             {
               "description": "Behavior",
               "name": "Behavior",
-              "supplementaryInformation": "Physics3D::Physics3D",
+              "supplementaryInformation": "Physics3D::ObjectCollider",
               "type": "behavior"
             },
             {
@@ -14835,23 +15517,214 @@
           "objectGroups": []
         },
         {
-          "description": "\nSet the collider's position",
-          "fullName": " Set the collider's position",
+          "description": "Set collider velocity",
+          "fullName": "Set collider velocity",
           "functionType": "Action",
-          "name": "SetPos",
-          "sentence": "Set _PARAM0_, X: _PARAM2_, Y: _PARAM3_, Z: _PARAM4_",
+          "group": "3D Velocity",
+          "name": "SetVelocity",
+          "sentence": "Set velocity _PARAM0_ X: _PARAM2_, Y: _PARAM3_, Z: _PARAM4_",
           "events": [
             {
               "type": "BuiltinCommonInstructions::JsCode",
               "inlineCode": [
                 "const boxBody = objects[0].collider;",
-                "const CANNON = gdjs._3DphysicsExt.get(\"CannonJS\");",
                 "",
                 "var newX = eventsFunctionContext.getArgument(\"X\"); ",
                 "var newY = eventsFunctionContext.getArgument(\"Y\"); ",
                 "var newZ = eventsFunctionContext.getArgument(\"Z\"); ",
                 "",
-                "boxBody.velocity.set(0,0,0);",
+                "boxBody.wakeUp();",
+                "boxBody.velocity.set(newX,newY,newZ);",
+                ""
+              ],
+              "parameterObjects": "Object",
+              "useStrict": true,
+              "eventsSheetExpanded": true
+            }
+          ],
+          "parameters": [
+            {
+              "description": "Object",
+              "name": "Object",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "object"
+            },
+            {
+              "description": "Behavior",
+              "name": "Behavior",
+              "supplementaryInformation": "Physics3D::ObjectCollider",
+              "type": "behavior"
+            },
+            {
+              "description": "Velocity X",
+              "name": "X",
+              "type": "expression"
+            },
+            {
+              "description": "Velocity Y",
+              "name": "Y",
+              "type": "expression"
+            },
+            {
+              "description": "Velocity Z",
+              "name": "Z",
+              "type": "expression"
+            }
+          ],
+          "objectGroups": []
+        },
+        {
+          "description": "Set collider X velocity",
+          "fullName": "Set collider X velocity",
+          "functionType": "Action",
+          "group": "3D Velocity",
+          "name": "SetVelocityX",
+          "sentence": "Set velocity _PARAM0_ X: _PARAM2_",
+          "events": [
+            {
+              "type": "BuiltinCommonInstructions::JsCode",
+              "inlineCode": [
+                "const boxBody = objects[0].collider;",
+                "",
+                "var newX = eventsFunctionContext.getArgument(\"X\"); ",
+                "",
+                "boxBody.wakeUp();",
+                "boxBody.velocity.x = newX;",
+                ""
+              ],
+              "parameterObjects": "Object",
+              "useStrict": true,
+              "eventsSheetExpanded": true
+            }
+          ],
+          "parameters": [
+            {
+              "description": "Object",
+              "name": "Object",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "object"
+            },
+            {
+              "description": "Behavior",
+              "name": "Behavior",
+              "supplementaryInformation": "Physics3D::ObjectCollider",
+              "type": "behavior"
+            },
+            {
+              "description": "Value",
+              "name": "X",
+              "type": "expression"
+            }
+          ],
+          "objectGroups": []
+        },
+        {
+          "description": "Set collider Y velocity",
+          "fullName": "Set collider Y velocity",
+          "functionType": "Action",
+          "group": "3D Velocity",
+          "name": "SetVelocityY",
+          "sentence": "Set velocity _PARAM0_ Y: _PARAM2_",
+          "events": [
+            {
+              "type": "BuiltinCommonInstructions::JsCode",
+              "inlineCode": [
+                "const boxBody = objects[0].collider;",
+                "",
+                "var newY = eventsFunctionContext.getArgument(\"Y\"); ",
+                "",
+                "boxBody.wakeUp();",
+                "boxBody.velocity.y = newY;",
+                ""
+              ],
+              "parameterObjects": "Object",
+              "useStrict": true,
+              "eventsSheetExpanded": true
+            }
+          ],
+          "parameters": [
+            {
+              "description": "Object",
+              "name": "Object",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "object"
+            },
+            {
+              "description": "Behavior",
+              "name": "Behavior",
+              "supplementaryInformation": "Physics3D::ObjectCollider",
+              "type": "behavior"
+            },
+            {
+              "description": "Value",
+              "name": "X",
+              "type": "expression"
+            }
+          ],
+          "objectGroups": []
+        },
+        {
+          "description": "Set collider Z velocity",
+          "fullName": "Set collider Z velocity",
+          "functionType": "Action",
+          "group": "3D Velocity",
+          "name": "SetVelocityZ",
+          "sentence": "Set velocity _PARAM0_ Z: _PARAM2_",
+          "events": [
+            {
+              "type": "BuiltinCommonInstructions::JsCode",
+              "inlineCode": [
+                "const boxBody = objects[0].collider;",
+                "",
+                "var newZ = eventsFunctionContext.getArgument(\"Z\"); ",
+                "",
+                "boxBody.wakeUp();",
+                "boxBody.velocity.z = newZ;",
+                ""
+              ],
+              "parameterObjects": "Object",
+              "useStrict": true,
+              "eventsSheetExpanded": true
+            }
+          ],
+          "parameters": [
+            {
+              "description": "Object",
+              "name": "Object",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "object"
+            },
+            {
+              "description": "Behavior",
+              "name": "Behavior",
+              "supplementaryInformation": "Physics3D::ObjectCollider",
+              "type": "behavior"
+            },
+            {
+              "description": "Value",
+              "name": "Z",
+              "type": "expression"
+            }
+          ],
+          "objectGroups": []
+        },
+        {
+          "description": "Set collider position",
+          "fullName": "Set collider position",
+          "functionType": "Action",
+          "group": "Position",
+          "name": "SetPos",
+          "sentence": "Set _PARAM0_ X: _PARAM2_, Y: _PARAM3_, Z: _PARAM4_",
+          "events": [
+            {
+              "type": "BuiltinCommonInstructions::JsCode",
+              "inlineCode": [
+                "const boxBody = objects[0].collider;",
+                "",
+                "var newX = eventsFunctionContext.getArgument(\"X\"); ",
+                "var newY = eventsFunctionContext.getArgument(\"Y\"); ",
+                "var newZ = eventsFunctionContext.getArgument(\"Z\"); ",
+                "",
                 "boxBody.position.set(newX,newY,newZ);",
                 ""
               ],
@@ -14870,7 +15743,7 @@
             {
               "description": "Behavior",
               "name": "Behavior",
-              "supplementaryInformation": "Physics3D::Physics3D",
+              "supplementaryInformation": "Physics3D::ObjectCollider",
               "type": "behavior"
             },
             {
@@ -14885,6 +15758,135 @@
             },
             {
               "description": "Z",
+              "name": "Z",
+              "type": "expression"
+            }
+          ],
+          "objectGroups": []
+        },
+        {
+          "description": "Set collider X position",
+          "fullName": "Set collider X position",
+          "functionType": "Action",
+          "group": "Position",
+          "name": "SetX",
+          "sentence": "Set _PARAM0_ X _PARAM2_",
+          "events": [
+            {
+              "type": "BuiltinCommonInstructions::JsCode",
+              "inlineCode": [
+                "const boxBody = objects[0].collider;",
+                "var newX = eventsFunctionContext.getArgument(\"X\"); ",
+                "",
+                "boxBody.position.x = newX;",
+                ""
+              ],
+              "parameterObjects": "Object",
+              "useStrict": true,
+              "eventsSheetExpanded": true
+            }
+          ],
+          "parameters": [
+            {
+              "description": "Object",
+              "name": "Object",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "object"
+            },
+            {
+              "description": "Behavior",
+              "name": "Behavior",
+              "supplementaryInformation": "Physics3D::ObjectCollider",
+              "type": "behavior"
+            },
+            {
+              "description": "Value",
+              "name": "X",
+              "type": "expression"
+            }
+          ],
+          "objectGroups": []
+        },
+        {
+          "description": "Set collider Y position",
+          "fullName": "Set collider Y position",
+          "functionType": "Action",
+          "group": "Position",
+          "name": "SetY",
+          "sentence": "Set _PARAM0_ Y _PARAM2_",
+          "events": [
+            {
+              "type": "BuiltinCommonInstructions::JsCode",
+              "inlineCode": [
+                "const boxBody = objects[0].collider;",
+                "var newY = eventsFunctionContext.getArgument(\"Y\"); ",
+                "",
+                "boxBody.position.y = newY;",
+                ""
+              ],
+              "parameterObjects": "Object",
+              "useStrict": true,
+              "eventsSheetExpanded": true
+            }
+          ],
+          "parameters": [
+            {
+              "description": "Object",
+              "name": "Object",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "object"
+            },
+            {
+              "description": "Behavior",
+              "name": "Behavior",
+              "supplementaryInformation": "Physics3D::ObjectCollider",
+              "type": "behavior"
+            },
+            {
+              "description": "Value",
+              "name": "Y",
+              "type": "expression"
+            }
+          ],
+          "objectGroups": []
+        },
+        {
+          "description": "Set collider Z position",
+          "fullName": "Set collider Z position",
+          "functionType": "Action",
+          "group": "Position",
+          "name": "SetZ",
+          "sentence": "Set _PARAM0_ Z _PARAM2_",
+          "events": [
+            {
+              "type": "BuiltinCommonInstructions::JsCode",
+              "inlineCode": [
+                "const boxBody = objects[0].collider;",
+                "var newZ = eventsFunctionContext.getArgument(\"Z\"); ",
+                "",
+                "boxBody.position.z = newZ;",
+                ""
+              ],
+              "parameterObjects": "Object",
+              "useStrict": true,
+              "eventsSheetExpanded": true
+            }
+          ],
+          "parameters": [
+            {
+              "description": "Object",
+              "name": "Object",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "object"
+            },
+            {
+              "description": "Behavior",
+              "name": "Behavior",
+              "supplementaryInformation": "Physics3D::ObjectCollider",
+              "type": "behavior"
+            },
+            {
+              "description": "Value",
               "name": "Z",
               "type": "expression"
             }
@@ -14925,7 +15927,334 @@
             {
               "description": "Behavior",
               "name": "Behavior",
-              "supplementaryInformation": "Physics3D::Physics3D",
+              "supplementaryInformation": "Physics3D::ObjectCollider",
+              "type": "behavior"
+            }
+          ],
+          "objectGroups": []
+        },
+        {
+          "description": "Create Rigid join",
+          "fullName": "Create Rigid join",
+          "functionType": "Action",
+          "group": "3D Joins",
+          "name": "RigidConstraint",
+          "sentence": "Create a rigid join_PARAM0_ and _PARAM2_ with max force: _PARAM3_",
+          "events": [
+            {
+              "type": "BuiltinCommonInstructions::JsCode",
+              "inlineCode": [
+                "const object2 = eventsFunctionContext.getObjects(\"Object2\");",
+                "const bodyA = objects[0].collider;",
+                "const bodyB = object2[0].collider;",
+                "",
+                "const behaviorName = eventsFunctionContext.getBehaviorName(\"Behavior\");",
+                "const behavior = object2[0].getBehavior(behaviorName);",
+                "",
+                "const CANNON = gdjs._3DphysicsExt.get(\"CannonJS\");",
+                "const world = runtimeScene._CannonJS.world;",
+                "",
+                "if(behavior){",
+                "    var constraint = new CANNON.LockConstraint(bodyA, bodyB, {",
+                "    maxForce: eventsFunctionContext.getArgument(\"MaxForce\")",
+                "});",
+                "",
+                "world.addConstraint(constraint);",
+                "}",
+                ""
+              ],
+              "parameterObjects": "Object",
+              "useStrict": true,
+              "eventsSheetExpanded": true
+            }
+          ],
+          "parameters": [
+            {
+              "description": "Object",
+              "name": "Object",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "object"
+            },
+            {
+              "description": "Behavior",
+              "name": "Behavior",
+              "supplementaryInformation": "Physics3D::ObjectCollider",
+              "type": "behavior"
+            },
+            {
+              "description": "Object 2",
+              "name": "Object2",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "objectList"
+            },
+            {
+              "description": "Max Force",
+              "name": "MaxForce",
+              "type": "expression"
+            }
+          ],
+          "objectGroups": []
+        },
+        {
+          "description": "Create Revolute join",
+          "fullName": "Create Revolute join",
+          "functionType": "Action",
+          "group": "3D Joins",
+          "name": "HingeConstraint",
+          "sentence": "Create a Revolute join _PARAM0_ offset X: _PARAM2_, Y: _PARAM3_, Z: _PARAM4_, Axes: _PARAM5_ and _PARAM6_ offset X: _PARAM7_, Y: _PARAM8_, Z: _PARAM9_, Axes: _PARAM10_ with max force: _PARAM11_",
+          "events": [
+            {
+              "type": "BuiltinCommonInstructions::JsCode",
+              "inlineCode": [
+                "const object2 = eventsFunctionContext.getObjects(\"Object2\");",
+                "const bodyA = objects[0].collider;",
+                "const bodyB = object2[0].collider;",
+                "",
+                "const behaviorName = eventsFunctionContext.getBehaviorName(\"Behavior\");",
+                "const behavior = object2[0].getBehavior(behaviorName);",
+                "",
+                "const CANNON = gdjs._3DphysicsExt.get(\"CannonJS\");",
+                "const world = runtimeScene._CannonJS.world;",
+                "",
+                "if(behavior){",
+                "",
+                "const pivotXA = eventsFunctionContext.getArgument(\"PivotX1\");",
+                "const pivotYA = eventsFunctionContext.getArgument(\"PivotY1\");",
+                "const pivotZA = eventsFunctionContext.getArgument(\"PivotZ1\");",
+                "const axisInfoA = eventsFunctionContext.getArgument(\"Axis1\");",
+                "let axisA = 0;",
+                "",
+                "if (axisInfoA == \"X\"){",
+                "    axisA = new CANNON.Vec3(1, 0, 0)",
+                "}else if (axisInfoA == \"Y\"){",
+                "    axisA = new CANNON.Vec3(0, 1, 0)",
+                "}else if (axisInfoA == \"Z\"){",
+                "    axisA = new CANNON.Vec3(0, 0, 1)",
+                "}else{",
+                "    axisA = new CANNON.Vec3(0, 0, 0)",
+                "}",
+                "",
+                "const pivotXB = eventsFunctionContext.getArgument(\"PivotX2\");",
+                "const pivotYB = eventsFunctionContext.getArgument(\"PivotY2\");",
+                "const pivotZB = eventsFunctionContext.getArgument(\"PivotZ2\");",
+                "const axisInfoB = eventsFunctionContext.getArgument(\"Axis2\");",
+                "let axisB = 0;",
+                "",
+                "if (axisInfoB == \"X\"){",
+                "    axisB = new CANNON.Vec3(1, 0, 0)",
+                "}else if (axisInfoB == \"Y\"){",
+                "    axisB = new CANNON.Vec3(0, 1, 0)",
+                "}else if (axisInfoB == \"Z\"){",
+                "    axisB = new CANNON.Vec3(0, 0, 1)",
+                "}else{",
+                "    axisB = new CANNON.Vec3(0, 0, 0)",
+                "}",
+                "",
+                "var hingeConstraint = new CANNON.HingeConstraint(bodyA, bodyB, {",
+                "    pivotA: new CANNON.Vec3(pivotXA, pivotYA, pivotZA), ",
+                "    pivotB: new CANNON.Vec3(pivotXB, pivotYB, pivotZB), ",
+                "    axisA: axisA,",
+                "    axisB: axisB,",
+                "    maxForce: eventsFunctionContext.getArgument(\"MaxForce\")",
+                "});",
+                "",
+                "// Добавление соединения к миру",
+                "world.addConstraint(hingeConstraint);",
+                "}",
+                ""
+              ],
+              "parameterObjects": "Object",
+              "useStrict": true,
+              "eventsSheetExpanded": true
+            }
+          ],
+          "parameters": [
+            {
+              "description": "Object",
+              "name": "Object",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "object"
+            },
+            {
+              "description": "Behavior",
+              "name": "Behavior",
+              "supplementaryInformation": "Physics3D::ObjectCollider",
+              "type": "behavior"
+            },
+            {
+              "description": "Position X offset for first object",
+              "name": "PivotX1",
+              "type": "expression"
+            },
+            {
+              "description": "Position Y offset for first object",
+              "name": "PivotY1",
+              "type": "expression"
+            },
+            {
+              "description": "Position Z offset for first object",
+              "name": "PivotZ1",
+              "type": "expression"
+            },
+            {
+              "description": "Axes for first object",
+              "name": "Axis1",
+              "supplementaryInformation": "[\"X\",\"Y\",\"Z\"]",
+              "type": "stringWithSelector"
+            },
+            {
+              "description": "Object 2",
+              "name": "Object2",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "objectList"
+            },
+            {
+              "description": "Position X offset for second object",
+              "name": "PivotX2",
+              "type": "expression"
+            },
+            {
+              "description": "Position Y offset for second object",
+              "name": "PivotY2",
+              "type": "expression"
+            },
+            {
+              "description": "Position Z offset for second object",
+              "name": "PivotZ2",
+              "type": "expression"
+            },
+            {
+              "description": "Axes for second object",
+              "name": "Axis2",
+              "supplementaryInformation": "[\"X\",\"Y\",\"Z\"]",
+              "type": "stringWithSelector"
+            },
+            {
+              "description": "Max Force",
+              "name": "MaxForce",
+              "type": "expression"
+            }
+          ],
+          "objectGroups": []
+        },
+        {
+          "fullName": "Get X Velocity",
+          "functionType": "Expression",
+          "name": "XVelocity",
+          "sentence": "",
+          "events": [
+            {
+              "type": "BuiltinCommonInstructions::JsCode",
+              "inlineCode": [
+                "const boxBody = objects[0].collider;",
+                "if(boxBody){",
+                "const xVel = boxBody.velocity.x;",
+                "eventsFunctionContext.returnValue = xVel;",
+                "}",
+                "",
+                ""
+              ],
+              "parameterObjects": "Object",
+              "useStrict": true,
+              "eventsSheetExpanded": false
+            }
+          ],
+          "expressionType": {
+            "type": "expression"
+          },
+          "parameters": [
+            {
+              "description": "Object",
+              "name": "Object",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "object"
+            },
+            {
+              "description": "Behavior",
+              "name": "Behavior",
+              "supplementaryInformation": "Physics3D::ObjectCollider",
+              "type": "behavior"
+            }
+          ],
+          "objectGroups": []
+        },
+        {
+          "fullName": "Get Y Velocity",
+          "functionType": "Expression",
+          "name": "YVelocity",
+          "sentence": "",
+          "events": [
+            {
+              "type": "BuiltinCommonInstructions::JsCode",
+              "inlineCode": [
+                "const boxBody = objects[0].collider;",
+                "if(boxBody){",
+                "const yVel = boxBody.velocity.y;",
+                "eventsFunctionContext.returnValue = yVel;",
+                "}",
+                "",
+                ""
+              ],
+              "parameterObjects": "Object",
+              "useStrict": true,
+              "eventsSheetExpanded": false
+            }
+          ],
+          "expressionType": {
+            "type": "expression"
+          },
+          "parameters": [
+            {
+              "description": "Object",
+              "name": "Object",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "object"
+            },
+            {
+              "description": "Behavior",
+              "name": "Behavior",
+              "supplementaryInformation": "Physics3D::ObjectCollider",
+              "type": "behavior"
+            }
+          ],
+          "objectGroups": []
+        },
+        {
+          "fullName": "Get Z Velocity",
+          "functionType": "Expression",
+          "name": "ZVelocity",
+          "sentence": "",
+          "events": [
+            {
+              "type": "BuiltinCommonInstructions::JsCode",
+              "inlineCode": [
+                "const boxBody = objects[0].collider;",
+                "if(boxBody){",
+                "const zVel = boxBody.velocity.z;",
+                "eventsFunctionContext.returnValue = zVel;",
+                "}",
+                "",
+                ""
+              ],
+              "parameterObjects": "Object",
+              "useStrict": true,
+              "eventsSheetExpanded": false
+            }
+          ],
+          "expressionType": {
+            "type": "expression"
+          },
+          "parameters": [
+            {
+              "description": "Object",
+              "name": "Object",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "object"
+            },
+            {
+              "description": "Behavior",
+              "name": "Behavior",
+              "supplementaryInformation": "Physics3D::ObjectCollider",
               "type": "behavior"
             }
           ],
@@ -15135,6 +16464,7 @@
                 "const directionX = Math.cos(angleRad);",
                 "const directionY = Math.sin(angleRad);",
                 "const direction = new CANNON.Vec3(directionX * moveDistance, directionY * moveDistance, 0);",
+                "boxBody.wakeUp();",
                 "boxBody.velocity.x += direction.x;",
                 "boxBody.velocity.y += direction.y;",
                 "",
@@ -15192,6 +16522,7 @@
               "inlineCode": [
                 "const boxBody = objects[0].collider;",
                 "const moveDistance = eventsFunctionContext.getArgument(\"Speed\"); ",
+                "boxBody.wakeUp();",
                 "boxBody.velocity.z += moveDistance;",
                 ""
               ],
