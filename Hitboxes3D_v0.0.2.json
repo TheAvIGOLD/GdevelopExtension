@@ -1,0 +1,683 @@
+{
+  "author": "",
+  "category": "General",
+  "extensionNamespace": "",
+  "fullName": "Hitboxes 3D",
+  "helpPath": "",
+  "iconUrl": "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz48IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9HcmFwaGljcy9TVkcvMS4xL0RURC9zdmcxMS5kdGQiPjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0ibWRpLWFscGhhLWgtYm94IiB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTksN1YxN0gxMVYxM0gxM1YxN0gxNVY3SDEzVjExSDExVjdIOU01LDNIMTlBMiwyIDAgMCwxIDIxLDVWMTlBMiwyIDAgMCwxIDE5LDIxSDVBMiwyIDAgMCwxIDMsMTlWNUEyLDIgMCAwLDEgNSwzWiIgLz48L3N2Zz4=",
+  "name": "Hitboxes3D",
+  "previewIconUrl": "https://asset-resources.gdevelop.io/public-resources/Icons/6e120b858fce8993df52cdf464ea0b0d46249995c898ba402efde13edb123bba_alpha-h-box.svg",
+  "shortDescription": "",
+  "version": "0.0.2",
+  "description": "",
+  "tags": [],
+  "authorIds": [
+    "l2OaORwcgyX7y4HQY2dHPmdTuDj2"
+  ],
+  "dependencies": [],
+  "eventsFunctions": [
+    {
+      "description": "Create hitbox",
+      "fullName": "Create animation hitbox",
+      "functionType": "Action",
+      "group": "Hitboxes create",
+      "name": "CreateBoneBoxCollider",
+      "sentence": "Create animation hitbox _PARAM3_ for _PARAM1_  in Bone: _PARAM2_, Offset -  X: _PARAM4_, Y: _PARAM5_, Z: _PARAM6_, Width: _PARAM7_, Height: _PARAM8_, Depth: _PARAM9_, Rotation - RotX: _PARAM10_, RotY: _PARAM11_, RotZ: _PARAM12_, Color: _PARAM13_, Visible: _PARAM14_",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "if (!objects[0].colliders) {",
+            "    objects[0].colliders = {};",
+            "}",
+            "let skeleton",
+            "objects[0].get3DRendererObject().traverse((node) => {",
+            "    if (node instanceof THREE.SkinnedMesh) {",
+            "",
+            "        skeleton = node.skeleton;",
+            "        return;",
+            "    }",
+            "});",
+            " ",
+            "const coliderIdentifier = eventsFunctionContext.getArgument(\"Identifier\");",
+            "",
+            "if (objects[0].colliders && objects[0].colliders[coliderIdentifier]) {",
+            "    console.log(\"Collider with the specified identifier already exists for \"+objects[0]);",
+            "} else {",
+            "    ",
+            "    const width = eventsFunctionContext.getArgument(\"Width\");",
+            "    const height = eventsFunctionContext.getArgument(\"Height\");",
+            "    const depth = eventsFunctionContext.getArgument(\"Depth\");",
+            "    const geometry = new THREE.BoxGeometry(width, height, depth);",
+            "    const bone = skeleton.getBoneByName(eventsFunctionContext.getArgument(\"Bone\"));",
+            "",
+            "    const rgbColorGD = gdjs.rgbOrHexToRGBColor(eventsFunctionContext.getArgument(\"Color\"));",
+            "    const rgbColor = new THREE.Color(\"rgb(\" + rgbColorGD[0] + \", \" + rgbColorGD[1] + \", \" + rgbColorGD[2] + \")\")",
+            "",
+            "    const vis = eventsFunctionContext.getArgument(\"Visible\");",
+            "",
+            "    const material = new THREE.MeshBasicMaterial({ ",
+            "        color: rgbColor, ",
+            "        wireframe: true,",
+            "        visible: vis",
+            "    });",
+            "    const box = new THREE.Mesh(geometry, material);",
+            "    ",
+            "    ",
+            "    box.position.set(",
+            "        objects[0].getX() + eventsFunctionContext.getArgument(\"X\"),",
+            "        objects[0].getY() + eventsFunctionContext.getArgument(\"Y\"),",
+            "        objects[0].getZ() + eventsFunctionContext.getArgument(\"Z\")",
+            "    );",
+            "",
+            "    box.rotation.set(",
+            "        eventsFunctionContext.getArgument(\"Rotation_X\"),",
+            "        eventsFunctionContext.getArgument(\"Rotation_Y\"),",
+            "        eventsFunctionContext.getArgument(\"Rotation_Z\")",
+            "    );",
+            "",
+            "   const scene = runtimeScene.getLayer('').getRenderer().getThreeScene();",
+            "   scene.add(box);",
+            "",
+            "    const newCollider = {",
+            "        box: box,",
+            "        type: 1",
+            "    };",
+            "",
+            "   ",
+            "    objects[0].colliders[coliderIdentifier] = newCollider;",
+            "    bone.attach(box);",
+            "",
+            "}",
+            "",
+            "",
+            ""
+          ],
+          "parameterObjects": "Object",
+          "useStrict": true,
+          "eventsSheetExpanded": true
+        }
+      ],
+      "parameters": [
+        {
+          "description": "3D Object",
+          "name": "Object",
+          "supplementaryInformation": "Scene3D::Model3DObject",
+          "type": "objectList"
+        },
+        {
+          "description": "Bone name",
+          "name": "Bone",
+          "type": "string"
+        },
+        {
+          "description": "Identifier",
+          "name": "Identifier",
+          "type": "string"
+        },
+        {
+          "description": "X offset",
+          "name": "X",
+          "type": "expression"
+        },
+        {
+          "description": "Y offset",
+          "name": "Y",
+          "type": "expression"
+        },
+        {
+          "description": "Z offset",
+          "name": "Z",
+          "type": "expression"
+        },
+        {
+          "description": "Width",
+          "name": "Width",
+          "type": "expression"
+        },
+        {
+          "description": "Height",
+          "name": "Height",
+          "type": "expression"
+        },
+        {
+          "description": "Depth",
+          "name": "Depth",
+          "type": "expression"
+        },
+        {
+          "description": "Rotation X",
+          "name": "Rotation_X",
+          "type": "expression"
+        },
+        {
+          "description": "Rotation Y",
+          "name": "Rotation_Y",
+          "type": "expression"
+        },
+        {
+          "description": "Rotation Z",
+          "name": "Rotation_Z",
+          "type": "expression"
+        },
+        {
+          "description": "Color",
+          "name": "Color",
+          "type": "color"
+        },
+        {
+          "defaultValue": "True",
+          "description": "Visible",
+          "name": "Visible",
+          "optional": true,
+          "type": "trueorfalse"
+        }
+      ],
+      "objectGroups": []
+    },
+    {
+      "description": "Create hitbox ",
+      "fullName": "Create static hitbox",
+      "functionType": "Action",
+      "group": "Hitboxes create",
+      "name": "CreateBoxCollider",
+      "sentence": "Create hitbox  _PARAM2_ for _PARAM1_, Offset -  X: _PARAM3_, Y: _PARAM4_, Z: _PARAM5_, Width: _PARAM6_, Height: _PARAM7_, Depth: _PARAM8_, Rotation - RotX: _PARAM9_, RotY: _PARAM10_, RotZ: _PARAM11_, Color: _PARAM12_, Visible: _PARAM13_",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "if (!objects[0].colliders) {",
+            "    objects[0].colliders = {};",
+            "}",
+            "const coliderIdentifier = eventsFunctionContext.getArgument(\"Identifier\");",
+            "",
+            "if (objects[0].colliders && objects[0].colliders[coliderIdentifier]) {",
+            "    console.log(\"Collider with the specified identifier already exists for\"+objects[0]);",
+            "} else {",
+            "    ",
+            "    const width = eventsFunctionContext.getArgument(\"Width\");",
+            "    const height = eventsFunctionContext.getArgument(\"Height\");",
+            "    const depth = eventsFunctionContext.getArgument(\"Depth\");",
+            "    const geometry = new THREE.BoxGeometry(width, height, depth);",
+            "",
+            "    const rgbColorGD = gdjs.rgbOrHexToRGBColor(eventsFunctionContext.getArgument(\"Color\"));",
+            "    const rgbColor = new THREE.Color(\"rgb(\" + rgbColorGD[0] + \", \" + rgbColorGD[1] + \", \" + rgbColorGD[2] + \")\")",
+            "",
+            "    const vis = eventsFunctionContext.getArgument(\"Visible\");",
+            "",
+            "    const material = new THREE.MeshBasicMaterial({ ",
+            "        color: rgbColor, ",
+            "        wireframe: true,",
+            "        visible: vis",
+            "    });",
+            "    const box = new THREE.Mesh(geometry, material);",
+            "    ",
+            "    ",
+            "    box.position.set(",
+            "        objects[0].getX() + eventsFunctionContext.getArgument(\"X\"),",
+            "        objects[0].getY() + eventsFunctionContext.getArgument(\"Y\"),",
+            "        objects[0].getZ() + eventsFunctionContext.getArgument(\"Z\")",
+            "    );",
+            "",
+            "    box.rotation.set(",
+            "        eventsFunctionContext.getArgument(\"Rotation_X\"),",
+            "        eventsFunctionContext.getArgument(\"Rotation_Y\"),",
+            "        eventsFunctionContext.getArgument(\"Rotation_Z\")",
+            "    );",
+            "",
+            "   const scene = runtimeScene.getLayer('').getRenderer().getThreeScene();",
+            "   scene.add(box);",
+            "",
+            "    const newCollider = {",
+            "        box: box,",
+            "        type: 1",
+            "    };",
+            "",
+            "   ",
+            "    objects[0].colliders[coliderIdentifier] = newCollider;",
+            "    objects[0].get3DRendererObject().attach(box);",
+            "",
+            "}",
+            "",
+            "",
+            ""
+          ],
+          "parameterObjects": "Object",
+          "useStrict": true,
+          "eventsSheetExpanded": true
+        }
+      ],
+      "parameters": [
+        {
+          "description": "3D Object",
+          "name": "Object",
+          "supplementaryInformation": "Scene3D::Model3DObject",
+          "type": "objectList"
+        },
+        {
+          "description": "Identifier",
+          "name": "Identifier",
+          "type": "string"
+        },
+        {
+          "description": "X offset ",
+          "name": "X",
+          "type": "expression"
+        },
+        {
+          "description": "Y offset",
+          "name": "Y",
+          "type": "expression"
+        },
+        {
+          "description": "Z offset",
+          "name": "Z",
+          "type": "expression"
+        },
+        {
+          "description": "Width",
+          "name": "Width",
+          "type": "expression"
+        },
+        {
+          "description": "Height",
+          "name": "Height",
+          "type": "expression"
+        },
+        {
+          "description": "Depth",
+          "name": "Depth",
+          "type": "expression"
+        },
+        {
+          "description": "Rotation X",
+          "name": "Rotation_X",
+          "type": "expression"
+        },
+        {
+          "description": "Rotation Y",
+          "name": "Rotation_Y",
+          "type": "expression"
+        },
+        {
+          "description": "Rotation Z",
+          "name": "Rotation_Z",
+          "type": "expression"
+        },
+        {
+          "description": "Color",
+          "name": "Color",
+          "type": "color"
+        },
+        {
+          "defaultValue": "True",
+          "description": "Visible",
+          "name": "Visible",
+          "optional": true,
+          "type": "trueorfalse"
+        }
+      ],
+      "objectGroups": []
+    },
+    {
+      "fullName": "Set hitbox offset",
+      "functionType": "Action",
+      "group": "Hitboxes options",
+      "name": "SetPositions",
+      "sentence": "Hitbox _PARAM1_ _PARAM2_ set offset X: _PARAM3_, Y: _PARAM4_, Z: _PARAM5_",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "const identifier = eventsFunctionContext.getArgument(\"Identifier\");",
+            "",
+            "if (objects[0] && objects[0].colliders && objects[0].colliders[identifier]) {",
+            "    const collider = objects[0].colliders[identifier].box;",
+            "",
+            "    const localPosition = collider.parent.worldToLocal(",
+            "        new THREE.Vector3(",
+            "            objects[0].getX() + eventsFunctionContext.getArgument(\"NewX\"),",
+            "            (objects[0].getY() + eventsFunctionContext.getArgument(\"NewY\"))*-1,",
+            "            objects[0].getZ() + eventsFunctionContext.getArgument(\"NewZ\")",
+            "        )",
+            "    );",
+            "",
+            "    const newX = localPosition.x ;",
+            "    const newY = localPosition.y ;",
+            "    const newZ = localPosition.z ;",
+            "",
+            "    collider.position.set(newX, newY, newZ);",
+            "",
+            "    console.info(collider.position.y);",
+            "}",
+            ""
+          ],
+          "parameterObjects": "Object",
+          "useStrict": true,
+          "eventsSheetExpanded": true
+        }
+      ],
+      "parameters": [
+        {
+          "description": "Object",
+          "name": "Object",
+          "supplementaryInformation": "Scene3D::Model3DObject",
+          "type": "objectList"
+        },
+        {
+          "description": "Identifier",
+          "name": "Identifier",
+          "type": "string"
+        },
+        {
+          "description": "X offset",
+          "name": "NewX",
+          "type": "expression"
+        },
+        {
+          "description": "Y offset",
+          "name": "NewY",
+          "type": "expression"
+        },
+        {
+          "description": "Z offset",
+          "name": "NewZ",
+          "type": "expression"
+        }
+      ],
+      "objectGroups": []
+    },
+    {
+      "fullName": "Set hitbox color",
+      "functionType": "Action",
+      "group": "Hitboxes options",
+      "name": "SetColor",
+      "sentence": "Hitbox _PARAM1_ _PARAM2_ set color _PARAM3_",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "const identifier = eventsFunctionContext.getArgument(\"Identifier\");",
+            "",
+            "if (objects[0] && objects[0].colliders && objects[0].colliders[identifier]) {",
+            "",
+            "const collider = objects[0].colliders[identifier].box;",
+            "",
+            "const rgbColorGD = gdjs.rgbOrHexToRGBColor(eventsFunctionContext.getArgument(\"Color\"));",
+            "const rgbColor = new THREE.Color(\"rgb(\" + rgbColorGD[0] + \", \" + rgbColorGD[1] + \", \" + rgbColorGD[2] + \")\")",
+            "",
+            "collider.material.color.set(rgbColor);",
+            "",
+            "   ",
+            "}",
+            ""
+          ],
+          "parameterObjects": "Object",
+          "useStrict": true,
+          "eventsSheetExpanded": true
+        }
+      ],
+      "parameters": [
+        {
+          "description": "Object",
+          "name": "Object",
+          "supplementaryInformation": "Scene3D::Model3DObject",
+          "type": "objectList"
+        },
+        {
+          "description": "Identifier",
+          "name": "Identifier",
+          "type": "string"
+        },
+        {
+          "description": "Color",
+          "name": "Color",
+          "type": "color"
+        }
+      ],
+      "objectGroups": []
+    },
+    {
+      "fullName": "Set hitbox visible",
+      "functionType": "Action",
+      "group": "Hitboxes options",
+      "name": "SetVisible",
+      "sentence": "Hitbox _PARAM1_ _PARAM2_ set visible _PARAM3_",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "const identifier = eventsFunctionContext.getArgument(\"Identifier\");",
+            "",
+            "if (objects[0] && objects[0].colliders && objects[0].colliders[identifier]) {",
+            "",
+            "const collider = objects[0].colliders[identifier].box;",
+            "",
+            "const vis = eventsFunctionContext.getArgument(\"Visible\");",
+            "",
+            "collider.material.visible = vis;",
+            "",
+            "   ",
+            "}"
+          ],
+          "parameterObjects": "Object",
+          "useStrict": true,
+          "eventsSheetExpanded": true
+        }
+      ],
+      "parameters": [
+        {
+          "description": "Object",
+          "name": "Object",
+          "supplementaryInformation": "Scene3D::Model3DObject",
+          "type": "objectList"
+        },
+        {
+          "description": "Identifier",
+          "name": "Identifier",
+          "type": "string"
+        },
+        {
+          "defaultValue": "True",
+          "description": "Visible",
+          "name": "Visible",
+          "optional": true,
+          "type": "trueorfalse"
+        }
+      ],
+      "objectGroups": []
+    },
+    {
+      "fullName": "Remove hitbox",
+      "functionType": "Action",
+      "group": "Hitboxes options",
+      "name": "DelCollider",
+      "sentence": "Remove hitbox _PARAM2_ _PARAM1_ ",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "const identifier = eventsFunctionContext.getArgument(\"Identifier\");",
+            "const scene = runtimeScene.getLayer('').getRenderer().getThreeScene();",
+            "",
+            "if (objects[0] && objects[0].colliders && objects[0].colliders[identifier]) {",
+            "    const collider = objects[0].colliders[identifier].box;",
+            "    ",
+            "",
+            "",
+            "    collider.removeFromParent()",
+            "    scene.remove(collider);",
+            "",
+            "",
+            "    delete objects[0].colliders[identifier];",
+            "}"
+          ],
+          "parameterObjects": "Object",
+          "useStrict": true,
+          "eventsSheetExpanded": true
+        }
+      ],
+      "parameters": [
+        {
+          "description": "Object",
+          "name": "Object",
+          "supplementaryInformation": "Scene3D::Model3DObject",
+          "type": "objectList"
+        },
+        {
+          "description": "Identifier",
+          "name": "Identifier",
+          "type": "string"
+        }
+      ],
+      "objectGroups": []
+    },
+    {
+      "description": "Hitboxes intersect",
+      "fullName": "Hitboxes intersect",
+      "functionType": "Condition",
+      "name": "Colliders_intersect",
+      "sentence": "_PARAM1_ _PARAM2_ is collided with _PARAM3_ _PARAM4_",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "const identifier1 = eventsFunctionContext.getArgument(\"Collider1\");",
+            "const identifier2 = eventsFunctionContext.getArgument(\"Collider2\");",
+            "",
+            "const objects1 = objects[0];",
+            "const objects2 = eventsFunctionContext.getObjects(\"Object2\");",
+            "",
+            "const object1 = objects1;",
+            "const object2 = objects2[0];",
+            "",
+            "",
+            "if (object1 && object1.colliders && object1.colliders[identifier1] && ",
+            "object2 && object2.colliders && object2.colliders[identifier2]) {",
+            "",
+            "    const colider1 = object1.colliders[identifier1].box;",
+            "    const colider2 = object2.colliders[identifier2].box;",
+            "",
+            "    if (colider1 && colider2) {",
+            "",
+            "        colider1.updateMatrixWorld();",
+            "        colider2.updateMatrixWorld();",
+            "",
+            "        const box1 = new THREE.Box3().setFromObject(colider1);",
+            "        const box2 = new THREE.Box3().setFromObject(colider2);",
+            "",
+            "",
+            "",
+            "        if (box1.intersectsBox(box2)) {",
+            "            eventsFunctionContext.returnValue = true;",
+            "        } ",
+            "    }",
+            "}"
+          ],
+          "parameterObjects": "Object1",
+          "useStrict": true,
+          "eventsSheetExpanded": true
+        }
+      ],
+      "parameters": [
+        {
+          "description": "Object #1",
+          "name": "Object1",
+          "supplementaryInformation": "Scene3D::Model3DObject",
+          "type": "objectList"
+        },
+        {
+          "description": "Collider's Identifier of Object #1",
+          "name": "Collider1",
+          "type": "string"
+        },
+        {
+          "description": "Object #2",
+          "name": "Object2",
+          "supplementaryInformation": "Scene3D::Model3DObject",
+          "type": "objectList"
+        },
+        {
+          "description": "Collider's Identifier of Object #2",
+          "name": "Collider2",
+          "type": "string"
+        }
+      ],
+      "objectGroups": []
+    },
+    {
+      "description": "Point inside hitbox",
+      "fullName": "Point inside hitbox",
+      "functionType": "Condition",
+      "name": "Colliders_intersect_point",
+      "sentence": "X: _PARAM3_, Y: _PARAM4_, Z: _PARAM5_ is inside _PARAM1_ _PARAM2_ ",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "const identifier = eventsFunctionContext.getArgument(\"Collider1\");",
+            "const pointX = eventsFunctionContext.getArgument(\"X\");",
+            "const pointY = eventsFunctionContext.getArgument(\"Y\");",
+            "const pointZ = eventsFunctionContext.getArgument(\"Z\");",
+            "",
+            "if (objects[0] && objects[0].colliders && objects[0].colliders[identifier]) {",
+            "    const collider = objects[0].colliders[identifier].box;",
+            "",
+            "    if (collider) {",
+            "        collider.updateMatrixWorld();",
+            "",
+            "        const raycaster = new THREE.Raycaster(",
+            "            new THREE.Vector3(pointX, pointY, pointZ),",
+            "            new THREE.Vector3(0, -1, 0)",
+            "        );",
+            "",
+            "        const intersections = raycaster.intersectObject(collider, true);",
+            "",
+            "        if (intersections.length > 0) {",
+            "            eventsFunctionContext.returnValue = true;",
+            "        } else {",
+            "            eventsFunctionContext.returnValue = false;",
+            "        }",
+            "    }",
+            "}",
+            ""
+          ],
+          "parameterObjects": "Object1",
+          "useStrict": true,
+          "eventsSheetExpanded": true
+        }
+      ],
+      "parameters": [
+        {
+          "description": "Object",
+          "name": "Object1",
+          "supplementaryInformation": "Scene3D::Model3DObject",
+          "type": "objectList"
+        },
+        {
+          "description": "Hitbox Identifier ",
+          "name": "Collider1",
+          "type": "string"
+        },
+        {
+          "description": "Point X",
+          "name": "X",
+          "type": "expression"
+        },
+        {
+          "description": "Point Y",
+          "name": "Y",
+          "type": "expression"
+        },
+        {
+          "description": "Point Z",
+          "name": "Z",
+          "type": "expression"
+        }
+      ],
+      "objectGroups": []
+    }
+  ],
+  "eventsBasedBehaviors": [],
+  "eventsBasedObjects": []
+}
