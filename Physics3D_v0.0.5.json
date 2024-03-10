@@ -4,11 +4,11 @@
   "extensionNamespace": "",
   "fullName": "3D Physics (Cannon js)",
   "helpPath": "",
-  "iconUrl": "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz48IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9HcmFwaGljcy9TVkcvMS4xL0RURC9zdmcxMS5kdGQiPjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0ibWRpLWRyYXdpbmctYm94IiB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTE4LDE4SDEyVjEyLjIxQzExLjM0LDEyLjgyIDEwLjQ3LDEzLjIgOS41LDEzLjJDNy40NiwxMy4yIDUuOCwxMS41NCA1LjgsOS41QTMuNywzLjcgMCAwLDEgOS41LDUuOEMxMS41NCw1LjggMTMuMiw3LjQ2IDEzLjIsOS41QzEzLjIsMTAuNDcgMTIuODIsMTEuMzQgMTIuMjEsMTJIMThNMTksM0g1QzMuODksMyAzLDMuODkgMyw1VjE5QTIsMiAwIDAsMCA1LDIxSDE5QTIsMiAwIDAsMCAyMSwxOVY1QzIxLDMuODkgMjAuMSwzIDE5LDNaIiAvPjwvc3ZnPg==",
+  "iconUrl": "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz48IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9HcmFwaGljcy9TVkcvMS4xL0RURC9zdmcxMS5kdGQiPjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0ibWRpLWN1YmUtc2VuZCIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiB2aWV3Qm94PSIwIDAgMjQgMjQiPjxwYXRoIGQ9Ik0xNiw0TDksOC4wNFYxNS45NkwxNiwyMEwyMywxNS45NlY4LjA0TTE2LDYuMzFMMTkuOCw4LjVMMTYsMTAuNjlMMTIuMjEsOC41TTAsN1Y5SDdWN00xMSwxMC4xMUwxNSwxMi40MlYxNy4xMUwxMSwxNC44MU0yMSwxMC4xMVYxNC44MUwxNywxNy4xMVYxMi40Mk0yLDExVjEzSDdWMTFNNCwxNVYxN0g3VjE1IiAvPjwvc3ZnPg==",
   "name": "Physics3D",
-  "previewIconUrl": "https://asset-resources.gdevelop.io/public-resources/Icons/3989033c8ae00d45cb3201d29fbee4271866b16ea733e3c7cf10c322415a1cc7_drawing-box.svg",
+  "previewIconUrl": "https://asset-resources.gdevelop.io/public-resources/Icons/2cbc7d01420084b3a820e1cbc6a894823de82a3c5fe02ac7b4a9615a226df169_cube-send.svg",
   "shortDescription": "",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "",
   "tags": [
     "3D"
@@ -13771,17 +13771,15 @@
               "inlineCode": [
                 "const CANNON = gdjs._3DphysicsExt.get(\"CannonJS\");",
                 "",
-                "const renderer = runtimeScene.getLayer('').getRenderer();",
-                "const scene = renderer.getThreeScene();",
-                "",
                 "const world = new CANNON.World();",
+                "world.gravity.set(0, 0, -98);",
                 "world.allowSleep = true",
-                "world.broadphase = new CANNON.NaiveBroadphase(); // Выбор алгоритма для обнаружения столкновений",
+                "world.broadphase = new CANNON.SAPBroadphase(world);// Выбор алгоритма для обнаружения столкновений",
                 "world.solver.iterations = 10; // Количество итераций для решения столкновений",
-                "world.gravity.set(0, 0, -100);",
                 "",
-                "const fixedTimeStep = 0.5 / 60.0;",
-                "const maxSubSteps = 6;",
+                "",
+                "const fixedTimeStep = 1 / 60.0;",
+                "const maxSubSteps = 10;",
                 "",
                 "",
                 "const physicsMaterial = new CANNON.Material(\"slipperyMaterial\");",
@@ -13792,16 +13790,25 @@
                 "    world: world,",
                 "    objects: []",
                 "};",
-                "",
-                "function animate() {",
+                "  var lastCallTime = 0;",
+                "function physUpdate() {",
+                "    requestAnimationFrame(physUpdate);",
                 "    ",
-                "    ",
-                "     const deltaTime = runtimeScene.getTimeManager().getElapsedTime(); ",
-                "     const roundedDeltaTime = Math.round(deltaTime * 100) / 100;",
-                "     console.log(deltaTime);",
                 "",
-                "    // Обновление мира с использованием адаптивной синхронизации времени",
-                "    world.step(fixedTimeStep, roundedDeltaTime, maxSubSteps);",
+                "        var now = Date.now() / 300;",
+                "",
+                "        if(!lastCallTime){",
+                "",
+                "            world.step(fixedTimeStep);",
+                "            lastCallTime = now;",
+                "            return;",
+                "        }",
+                "",
+                "        var timeSinceLastCall = now - lastCallTime;",
+                "",
+                "        world.step(fixedTimeStep, timeSinceLastCall, maxSubSteps);",
+                "",
+                "        lastCallTime = now;",
                 "",
                 "    runtimeScene._CannonJS.objects.forEach(function(obj) {",
                 "        const object = obj.object;",
@@ -13812,10 +13819,10 @@
                 "            object.setZ(obj.body.position.z);",
                 "            object.get3DRendererObject().quaternion.copy(body.quaternion);",
                 "    });",
-                "    requestAnimationFrame(animate);",
+                "    ",
                 "}",
                 "",
-                "animate();",
+                "physUpdate();",
                 ""
               ],
               "parameterObjects": "",
@@ -13868,8 +13875,8 @@
             "boxBody.position.set(posX, posY, posZ);",
             "boxBody.quaternion.copy(quaternion);",
             "",
-            "const boxMaterial = new CANNON.Material();",
-            "boxMaterial.friction = 1;",
+            "const boxMaterial = new CANNON.Material('slipperyMaterial');",
+            "boxMaterial.friction = 0.5;",
             "",
             "boxBody.collisionFilterGroup = 0|1|2|4|8|16;",
             "boxBody.collisionFilterMask = 0|1|2|4|8|16;",
@@ -14413,8 +14420,8 @@
             "planeBody.position.set(posX, posY, posZ);",
             "planeBody.quaternion.copy(quaternion);",
             "",
-            "const planeMaterial = new CANNON.Material();",
-            "planeMaterial.friction = 1;",
+            "const planeMaterial = new CANNON.Material('slipperyMaterial');",
+            "planeMaterial.friction = 0.5;",
             "",
             "planeBody.collisionFilterGroup = 0|1|2|4|8|16;",
             "planeBody.collisionFilterMask = 0|1|2|4|8|16;",
@@ -14853,11 +14860,12 @@
                 "    const height = eventsFunctionContext.getArgument(\"Height\") / 2;",
                 "    const depth = eventsFunctionContext.getArgument(\"Depth\") / 2;",
                 "    const visible = eventsFunctionContext.getArgument(\"Visible\");",
+                "    const type = behavior._getType();",
                 "",
                 "    const boxShape = new CANNON.Box(new CANNON.Vec3(width, height, depth));",
                 "    const boxBody = new CANNON.Body({ mass: behavior._getMass() });",
                 "",
-                "    const boxMaterial = new CANNON.Material();",
+                "    const boxMaterial = new CANNON.Material('slipperyMaterial');",
                 "    boxMaterial.friction = behavior._getFriction();",
                 "    boxMaterial.restitution = behavior._getRestitution();",
                 "    boxBody.material = boxMaterial;",
@@ -14866,7 +14874,18 @@
                 "    boxBody.quaternion.copy(objects[0].get3DRendererObject().quaternion);",
                 "    boxBody.fixedRotation = eventsFunctionContext.getArgument(\"FixedRotation\");",
                 "",
+                "    boxBody.linearDamping = behavior._getLinearDamping();",
+                "    boxBody.angularDamping = behavior._getAngularDamping();",
                 "",
+                "    if(type == \"Dynamic\"){",
+                "    boxBody.type = CANNON.Body.DYNAMIC;",
+                "    }else if(type == \"Static\"){",
+                "    boxBody.type = CANNON.Body.STATIC;",
+                "    }else {",
+                "    boxBody.type = CANNON.Body.KINEMATIC;",
+                "    }",
+                "",
+                "    ",
                 "    boxBody.collisionFilterGroup = 0;",
                 "",
                 "    if (behavior._getGroup1()) {",
@@ -15004,11 +15023,12 @@
                 "if (!objects[0].collider) {",
                 "    const radius = eventsFunctionContext.getArgument(\"Radius\")/2;",
                 "    const visible = eventsFunctionContext.getArgument(\"Visible\");",
+                "    const type = behavior._getType();",
                 "",
                 "    const sphereShape = new CANNON.Sphere(radius);",
                 "    const sphereBody = new CANNON.Body({ mass: behavior._getMass() });",
                 "",
-                "    const sphereMaterial = new CANNON.Material();",
+                "    const sphereMaterial = new CANNON.Material('slipperyMaterial');",
                 "    sphereMaterial.friction = behavior._getFriction();",
                 "    sphereMaterial.restitution = behavior._getRestitution();",
                 "    sphereBody.material = sphereMaterial;",
@@ -15016,6 +15036,17 @@
                 "    sphereBody.position.set(objects[0].getX(), objects[0].getY(), objects[0].getZ());",
                 "    sphereBody.quaternion.copy(objects[0].get3DRendererObject().quaternion);",
                 "    sphereBody.fixedRotation = eventsFunctionContext.getArgument(\"FixedRotation\");",
+                "",
+                "    sphereBody.linearDamping = behavior._getLinearDamping();",
+                "    sphereBody.angularDamping = behavior._getAngularDamping();",
+                "",
+                "    if(type == \"Dynamic\"){",
+                "    sphereBody.type = CANNON.Body.DYNAMIC;",
+                "    }else if(type == \"Static\"){",
+                "    sphereBody.type = CANNON.Body.STATIC;",
+                "    }else {",
+                "    sphereBody.type = CANNON.Body.KINEMATIC;",
+                "    }",
                 "",
                 "    sphereBody.collisionFilterGroup = 0;",
                 "",
@@ -15146,12 +15177,12 @@
                 "    const height = eventsFunctionContext.getArgument(\"Height\");",
                 "    const segments = eventsFunctionContext.getArgument(\"Segments\");",
                 "    const visible = eventsFunctionContext.getArgument(\"Visible\");",
-                "",
+                "    const type = behavior._getType();",
                 "",
                 "    const cylShape = new CANNON.Cylinder(radius, radius, height, segments); ",
                 "    const cylBody = new CANNON.Body({ mass: behavior._getMass() });",
                 "",
-                "    const cylMaterial = new CANNON.Material();",
+                "    const cylMaterial = new CANNON.Material('slipperyMaterial');",
                 "    cylMaterial.friction = behavior._getFriction();",
                 "    cylMaterial.restitution = behavior._getRestitution();",
                 "    cylBody.material = cylMaterial;",
@@ -15159,6 +15190,17 @@
                 "    cylBody.position.set(objects[0].getX(), objects[0].getY(), objects[0].getZ());",
                 "    cylBody.quaternion.copy(objects[0].get3DRendererObject().quaternion);",
                 "    cylBody.fixedRotation = eventsFunctionContext.getArgument(\"FixedRotation\");",
+                "",
+                "    cylBody.linearDamping = behavior._getLinearDamping();",
+                "    cylBody.angularDamping = behavior._getAngularDamping();",
+                "",
+                "    if(type == \"Dynamic\"){",
+                "    cylBody.type = CANNON.Body.DYNAMIC;",
+                "    }else if(type == \"Static\"){",
+                "    cylBody.type = CANNON.Body.STATIC;",
+                "    }else {",
+                "    cylBody.type = CANNON.Body.KINEMATIC;",
+                "    }",
                 "",
                 "    cylBody.collisionFilterGroup = 0;",
                 "",
@@ -15302,7 +15344,7 @@
                 "    const height = eventsFunctionContext.getArgument(\"Height\");",
                 "    const massBody = eventsFunctionContext.getArgument(\"Mass\");",
                 "    const visible = eventsFunctionContext.getArgument(\"Visible\");",
-                "",
+                "    const type = behavior._getType();",
                 "",
                 "    const cylShape = new CANNON.Cylinder(radius, radius, height - radius, 16);",
                 "    const sphereShapeTop = new CANNON.Sphere(radius);",
@@ -15313,7 +15355,7 @@
                 "",
                 "    const cylBody = new CANNON.Body({ mass: behavior._getMass() });",
                 "",
-                "    const cylMaterial = new CANNON.Material();",
+                "    const cylMaterial = new CANNON.Material('slipperyMaterial');",
                 "    cylMaterial.friction = behavior._getFriction();",
                 "    cylMaterial.restitution = behavior._getRestitution();",
                 "    cylBody.material = cylMaterial;",
@@ -15321,6 +15363,17 @@
                 "    cylBody.position.set(objects[0].getX(), objects[0].getY(), objects[0].getZ());",
                 "    cylBody.quaternion.copy(objects[0].get3DRendererObject().quaternion);",
                 "    cylBody.fixedRotation = eventsFunctionContext.getArgument(\"FixedRotation\");",
+                "",
+                "    cylBody.linearDamping = behavior._getLinearDamping();",
+                "    cylBody.angularDamping = behavior._getAngularDamping();",
+                "",
+                "    if(type == \"Dynamic\"){",
+                "    cylBody.type = CANNON.Body.DYNAMIC;",
+                "    }else if(type == \"Static\"){",
+                "    cylBody.type = CANNON.Body.STATIC;",
+                "    }else {",
+                "    cylBody.type = CANNON.Body.KINEMATIC;",
+                "    }",
                 "",
                 "    cylBody.collisionFilterGroup = 0;",
                 "",
@@ -15387,6 +15440,8 @@
                 "",
                 "   scene.add(debugMesh);",
                 "   objects[0].get3DRendererObject().attach(debugMesh);",
+                "",
+                "   debugMesh.userData.excludeFromCollision = true;",
                 "",
                 "    ",
                 "}",
@@ -15470,8 +15525,9 @@
                 "",
                 "var impulseDirection = new CANNON.Vec3(directionX, directionY, directionZ);",
                 "",
-                "impulseDirection = impulseDirection.scale(impulseForce);",
                 "",
+                "boxBody.wakeUp();",
+                "impulseDirection = impulseDirection.scale(impulseForce);",
                 "boxBody.applyImpulse(impulseDirection, boxBody.position);",
                 ""
               ],
@@ -15567,6 +15623,80 @@
             },
             {
               "description": "Velocity Z",
+              "name": "Z",
+              "type": "expression"
+            }
+          ],
+          "objectGroups": []
+        },
+        {
+          "description": "Set collider velocity by angle ",
+          "fullName": "Set collider velocity by angle ",
+          "functionType": "Action",
+          "group": "3D Velocity",
+          "name": "SetVelocityAngle",
+          "sentence": "Set velocity _PARAM0_ Value: _PARAM2_, Angles X: _PARAM3_, Y: _PARAM4_, Z: _PARAM5_",
+          "events": [
+            {
+              "type": "BuiltinCommonInstructions::JsCode",
+              "inlineCode": [
+                "const body = objects[0].collider;",
+                "",
+                "const angleX = eventsFunctionContext.getArgument(\"X\") * (Math.PI / 180); ",
+                "const angleY = eventsFunctionContext.getArgument(\"Y\") * (Math.PI / 180); ",
+                "const angleZ = eventsFunctionContext.getArgument(\"Z\") * (Math.PI / 180); ",
+                "const speed = eventsFunctionContext.getArgument(\"Value\");",
+                "",
+                "var directionX = Math.cos(angleZ) * Math.cos(angleY);",
+                "var directionY = Math.sin(angleZ) * Math.cos(angleY);",
+                "var directionZ = -Math.sin(angleY);",
+                "",
+                "if(body){",
+                "",
+                "const direction = new CANNON.Vec3(directionX * speed, directionY * speed, directionZ * speed);",
+                "",
+                "body.wakeUp();",
+                "body.velocity.x += direction.x;",
+                "body.velocity.y += direction.y;",
+                "body.velocity.z += direction.z;",
+                "",
+                "}"
+              ],
+              "parameterObjects": "Object",
+              "useStrict": true,
+              "eventsSheetExpanded": true
+            }
+          ],
+          "parameters": [
+            {
+              "description": "Object",
+              "name": "Object",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "object"
+            },
+            {
+              "description": "Behavior",
+              "name": "Behavior",
+              "supplementaryInformation": "Physics3D::Physics3D",
+              "type": "behavior"
+            },
+            {
+              "description": "Value",
+              "name": "Value",
+              "type": "expression"
+            },
+            {
+              "description": "Angle X",
+              "name": "X",
+              "type": "expression"
+            },
+            {
+              "description": "Angle Y",
+              "name": "Y",
+              "type": "expression"
+            },
+            {
+              "description": "Angle Z",
               "name": "Z",
               "type": "expression"
             }
@@ -15703,6 +15833,70 @@
             {
               "description": "Value",
               "name": "Z",
+              "type": "expression"
+            }
+          ],
+          "objectGroups": []
+        },
+        {
+          "description": "Set collider rotation",
+          "fullName": "Set collider rotation",
+          "functionType": "Action",
+          "group": "Rotation",
+          "name": "SetRotation",
+          "sentence": "Set _PARAM0_ rotation X: _PARAM2_, Y: _PARAM3_, Z: _PARAM4_",
+          "events": [
+            {
+              "type": "BuiltinCommonInstructions::JsCode",
+              "inlineCode": [
+                "const body = objects[0].collider;",
+                "",
+                "const angleX = eventsFunctionContext.getArgument(\"RotationX\") * (Math.PI / 180);",
+                "const angleY = eventsFunctionContext.getArgument(\"RotationY\") * (Math.PI / 180); ",
+                "const angleZ = eventsFunctionContext.getArgument(\"RotationZ\") * (Math.PI / 180); ",
+                "",
+                "const quaternion = new CANNON.Quaternion();",
+                "quaternion.setFromEuler(angleX, angleY, angleZ);",
+                "",
+                "",
+                "if (body) {",
+                "",
+                "    body.quaternion.copy(quaternion);",
+                "}",
+                "",
+                ""
+              ],
+              "parameterObjects": "Object",
+              "useStrict": true,
+              "eventsSheetExpanded": true
+            }
+          ],
+          "parameters": [
+            {
+              "description": "Object",
+              "name": "Object",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "object"
+            },
+            {
+              "description": "Behavior",
+              "name": "Behavior",
+              "supplementaryInformation": "Physics3D::Physics3D",
+              "type": "behavior"
+            },
+            {
+              "description": "Rotation X",
+              "name": "RotationX",
+              "type": "expression"
+            },
+            {
+              "description": "Rotation Y",
+              "name": "RotationY",
+              "type": "expression"
+            },
+            {
+              "description": "Rotation Z",
+              "name": "RotationZ",
               "type": "expression"
             }
           ],
@@ -16138,8 +16332,1048 @@
           "objectGroups": []
         },
         {
+          "description": "Set collider mass",
+          "fullName": "Set collider mass",
+          "functionType": "Action",
+          "group": "Collider properties",
+          "name": "SetMass",
+          "sentence": "Set _PARAM0_ mass _PARAM2_",
+          "events": [
+            {
+              "type": "BuiltinCommonInstructions::JsCode",
+              "inlineCode": [
+                "const body = objects[0].collider;",
+                "",
+                "if(body){",
+                "body.mass = eventsFunctionContext.getObjects(\"Value\");",
+                "}",
+                ""
+              ],
+              "parameterObjects": "Object",
+              "useStrict": true,
+              "eventsSheetExpanded": false
+            }
+          ],
+          "parameters": [
+            {
+              "description": "Object",
+              "name": "Object",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "object"
+            },
+            {
+              "description": "Behavior",
+              "name": "Behavior",
+              "supplementaryInformation": "Physics3D::Physics3D",
+              "type": "behavior"
+            },
+            {
+              "description": "Value",
+              "name": "Value",
+              "type": "expression"
+            }
+          ],
+          "objectGroups": []
+        },
+        {
+          "description": "Set collider friction",
+          "fullName": "Set collider friction",
+          "functionType": "Action",
+          "group": "Collider properties",
+          "name": "SetFriction",
+          "sentence": "Set _PARAM0_ friction _PARAM2_",
+          "events": [
+            {
+              "type": "BuiltinCommonInstructions::JsCode",
+              "inlineCode": [
+                "const body = objects[0].collider;",
+                "",
+                "if(body){",
+                "body.friction = eventsFunctionContext.getObjects(\"Value\");",
+                "}",
+                ""
+              ],
+              "parameterObjects": "Object",
+              "useStrict": true,
+              "eventsSheetExpanded": false
+            }
+          ],
+          "parameters": [
+            {
+              "description": "Object",
+              "name": "Object",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "object"
+            },
+            {
+              "description": "Behavior",
+              "name": "Behavior",
+              "supplementaryInformation": "Physics3D::Physics3D",
+              "type": "behavior"
+            },
+            {
+              "description": "Value",
+              "name": "Value",
+              "type": "expression"
+            }
+          ],
+          "objectGroups": []
+        },
+        {
+          "description": "Set collider restitution",
+          "fullName": "Set collider restitution",
+          "functionType": "Action",
+          "group": "Collider properties",
+          "name": "SetRestitution",
+          "sentence": "Set _PARAM0_ restitution _PARAM2_",
+          "events": [
+            {
+              "type": "BuiltinCommonInstructions::JsCode",
+              "inlineCode": [
+                "const body = objects[0].collider;",
+                "",
+                "if(body){",
+                "body.restitution = eventsFunctionContext.getObjects(\"Value\");",
+                "}",
+                ""
+              ],
+              "parameterObjects": "Object",
+              "useStrict": true,
+              "eventsSheetExpanded": false
+            }
+          ],
+          "parameters": [
+            {
+              "description": "Object",
+              "name": "Object",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "object"
+            },
+            {
+              "description": "Behavior",
+              "name": "Behavior",
+              "supplementaryInformation": "Physics3D::Physics3D",
+              "type": "behavior"
+            },
+            {
+              "description": "Value",
+              "name": "Value",
+              "type": "expression"
+            }
+          ],
+          "objectGroups": []
+        },
+        {
+          "description": "Set collider type",
+          "fullName": "Set collider type",
+          "functionType": "Action",
+          "group": "Collider properties",
+          "name": "SetType",
+          "sentence": "Set _PARAM0_ type_PARAM2_",
+          "events": [
+            {
+              "type": "BuiltinCommonInstructions::JsCode",
+              "inlineCode": [
+                "const body = objects[0].collider;",
+                "",
+                "if(body){",
+                "body.type = eventsFunctionContext.getObjects(\"Value\");",
+                "}",
+                ""
+              ],
+              "parameterObjects": "Object",
+              "useStrict": true,
+              "eventsSheetExpanded": false
+            }
+          ],
+          "parameters": [
+            {
+              "description": "Object",
+              "name": "Object",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "object"
+            },
+            {
+              "description": "Behavior",
+              "name": "Behavior",
+              "supplementaryInformation": "Physics3D::Physics3D",
+              "type": "behavior"
+            },
+            {
+              "description": "Type",
+              "name": "Value",
+              "supplementaryInformation": "[\"Dynamic\",\"Static\",\"Kinematic\"]",
+              "type": "stringWithSelector"
+            }
+          ],
+          "objectGroups": []
+        },
+        {
+          "description": "Set collider angular dampling ",
+          "fullName": "Set collider angular dampling ",
+          "functionType": "Action",
+          "group": "Collider damping properties",
+          "name": "SetAngDampling",
+          "sentence": "Set _PARAM0_ angular dampling  _PARAM2_",
+          "events": [
+            {
+              "type": "BuiltinCommonInstructions::JsCode",
+              "inlineCode": [
+                "const body = objects[0].collider;",
+                "",
+                "if(body){",
+                "body.angularDamping = eventsFunctionContext.getObjects(\"Value\");",
+                "}",
+                ""
+              ],
+              "parameterObjects": "Object",
+              "useStrict": true,
+              "eventsSheetExpanded": false
+            }
+          ],
+          "parameters": [
+            {
+              "description": "Object",
+              "name": "Object",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "object"
+            },
+            {
+              "description": "Behavior",
+              "name": "Behavior",
+              "supplementaryInformation": "Physics3D::Physics3D",
+              "type": "behavior"
+            },
+            {
+              "description": "Value (0-1)",
+              "name": "Value",
+              "type": "expression"
+            }
+          ],
+          "objectGroups": []
+        },
+        {
+          "description": "Set collider linear dampling ",
+          "fullName": "Set collider linear dampling ",
+          "functionType": "Action",
+          "group": "Collider dampling properties",
+          "name": "SetLinDampling",
+          "sentence": "Set _PARAM0_ linear dampling  _PARAM2_",
+          "events": [
+            {
+              "type": "BuiltinCommonInstructions::JsCode",
+              "inlineCode": [
+                "const body = objects[0].collider;",
+                "",
+                "if(body){",
+                "body.linearDamping = eventsFunctionContext.getObjects(\"Value\");",
+                "}",
+                ""
+              ],
+              "parameterObjects": "Object",
+              "useStrict": true,
+              "eventsSheetExpanded": false
+            }
+          ],
+          "parameters": [
+            {
+              "description": "Object",
+              "name": "Object",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "object"
+            },
+            {
+              "description": "Behavior",
+              "name": "Behavior",
+              "supplementaryInformation": "Physics3D::Physics3D",
+              "type": "behavior"
+            },
+            {
+              "description": "Value (0-1)",
+              "name": "Value",
+              "type": "expression"
+            }
+          ],
+          "objectGroups": []
+        },
+        {
+          "description": "Set collider layer activate",
+          "fullName": "Set collider layer activate",
+          "functionType": "Action",
+          "group": "Layers and masks",
+          "name": "SetLayers",
+          "private": true,
+          "sentence": "Set _PARAM0_ layer _PARAM2_ activate _PARAM3_",
+          "events": [
+            {
+              "folded": true,
+              "type": "BuiltinCommonInstructions::Standard",
+              "conditions": [
+                {
+                  "type": {
+                    "value": "CompareArgumentAsString"
+                  },
+                  "parameters": [
+                    "\"Layer\"",
+                    "=",
+                    "\"Layer #1\""
+                  ]
+                }
+              ],
+              "actions": [],
+              "events": [
+                {
+                  "type": "BuiltinCommonInstructions::Standard",
+                  "conditions": [
+                    {
+                      "type": {
+                        "value": "GetArgumentAsBoolean"
+                      },
+                      "parameters": [
+                        "\"Activate\""
+                      ]
+                    }
+                  ],
+                  "actions": [
+                    {
+                      "type": {
+                        "value": "Physics3D::Physics3D::SetPropertyGroup1"
+                      },
+                      "parameters": [
+                        "Object",
+                        "Behavior",
+                        "yes"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "BuiltinCommonInstructions::Standard",
+                  "conditions": [
+                    {
+                      "type": {
+                        "inverted": true,
+                        "value": "GetArgumentAsBoolean"
+                      },
+                      "parameters": [
+                        "\"Activate\""
+                      ]
+                    }
+                  ],
+                  "actions": [
+                    {
+                      "type": {
+                        "value": "Physics3D::Physics3D::SetPropertyGroup1"
+                      },
+                      "parameters": [
+                        "Object",
+                        "Behavior",
+                        "no"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "folded": true,
+              "type": "BuiltinCommonInstructions::Standard",
+              "conditions": [
+                {
+                  "type": {
+                    "value": "CompareArgumentAsString"
+                  },
+                  "parameters": [
+                    "\"Layer\"",
+                    "=",
+                    "\"Layer #2\""
+                  ]
+                }
+              ],
+              "actions": [],
+              "events": [
+                {
+                  "type": "BuiltinCommonInstructions::Standard",
+                  "conditions": [
+                    {
+                      "type": {
+                        "value": "GetArgumentAsBoolean"
+                      },
+                      "parameters": [
+                        "\"Activate\""
+                      ]
+                    }
+                  ],
+                  "actions": [
+                    {
+                      "type": {
+                        "value": "Physics3D::Physics3D::SetPropertyGroup2"
+                      },
+                      "parameters": [
+                        "Object",
+                        "Behavior",
+                        "yes"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "BuiltinCommonInstructions::Standard",
+                  "conditions": [
+                    {
+                      "type": {
+                        "inverted": true,
+                        "value": "GetArgumentAsBoolean"
+                      },
+                      "parameters": [
+                        "\"Activate\""
+                      ]
+                    }
+                  ],
+                  "actions": [
+                    {
+                      "type": {
+                        "value": "Physics3D::Physics3D::SetPropertyGroup2"
+                      },
+                      "parameters": [
+                        "Object",
+                        "Behavior",
+                        "no"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "folded": true,
+              "type": "BuiltinCommonInstructions::Standard",
+              "conditions": [
+                {
+                  "type": {
+                    "value": "CompareArgumentAsString"
+                  },
+                  "parameters": [
+                    "\"Layer\"",
+                    "=",
+                    "\"Layer #3\""
+                  ]
+                }
+              ],
+              "actions": [],
+              "events": [
+                {
+                  "type": "BuiltinCommonInstructions::Standard",
+                  "conditions": [
+                    {
+                      "type": {
+                        "value": "GetArgumentAsBoolean"
+                      },
+                      "parameters": [
+                        "\"Activate\""
+                      ]
+                    }
+                  ],
+                  "actions": [
+                    {
+                      "type": {
+                        "value": "Physics3D::Physics3D::SetPropertyGroup3"
+                      },
+                      "parameters": [
+                        "Object",
+                        "Behavior",
+                        "yes"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "BuiltinCommonInstructions::Standard",
+                  "conditions": [
+                    {
+                      "type": {
+                        "inverted": true,
+                        "value": "GetArgumentAsBoolean"
+                      },
+                      "parameters": [
+                        "\"Activate\""
+                      ]
+                    }
+                  ],
+                  "actions": [
+                    {
+                      "type": {
+                        "value": "Physics3D::Physics3D::SetPropertyGroup3"
+                      },
+                      "parameters": [
+                        "Object",
+                        "Behavior",
+                        "no"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "folded": true,
+              "type": "BuiltinCommonInstructions::Standard",
+              "conditions": [
+                {
+                  "type": {
+                    "value": "CompareArgumentAsString"
+                  },
+                  "parameters": [
+                    "\"Layer\"",
+                    "=",
+                    "\"Layer #4\""
+                  ]
+                }
+              ],
+              "actions": [],
+              "events": [
+                {
+                  "type": "BuiltinCommonInstructions::Standard",
+                  "conditions": [
+                    {
+                      "type": {
+                        "value": "GetArgumentAsBoolean"
+                      },
+                      "parameters": [
+                        "\"Activate\""
+                      ]
+                    }
+                  ],
+                  "actions": [
+                    {
+                      "type": {
+                        "value": "Physics3D::Physics3D::SetPropertyGroup4"
+                      },
+                      "parameters": [
+                        "Object",
+                        "Behavior",
+                        "yes"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "BuiltinCommonInstructions::Standard",
+                  "conditions": [
+                    {
+                      "type": {
+                        "inverted": true,
+                        "value": "GetArgumentAsBoolean"
+                      },
+                      "parameters": [
+                        "\"Activate\""
+                      ]
+                    }
+                  ],
+                  "actions": [
+                    {
+                      "type": {
+                        "value": "Physics3D::Physics3D::SetPropertyGroup4"
+                      },
+                      "parameters": [
+                        "Object",
+                        "Behavior",
+                        "no"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "folded": true,
+              "type": "BuiltinCommonInstructions::Standard",
+              "conditions": [
+                {
+                  "type": {
+                    "value": "CompareArgumentAsString"
+                  },
+                  "parameters": [
+                    "\"Layer\"",
+                    "=",
+                    "\"Layer #5\""
+                  ]
+                }
+              ],
+              "actions": [],
+              "events": [
+                {
+                  "type": "BuiltinCommonInstructions::Standard",
+                  "conditions": [
+                    {
+                      "type": {
+                        "value": "GetArgumentAsBoolean"
+                      },
+                      "parameters": [
+                        "\"Activate\""
+                      ]
+                    }
+                  ],
+                  "actions": [
+                    {
+                      "type": {
+                        "value": "Physics3D::Physics3D::SetPropertyGroup5"
+                      },
+                      "parameters": [
+                        "Object",
+                        "Behavior",
+                        "yes"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "BuiltinCommonInstructions::Standard",
+                  "conditions": [
+                    {
+                      "type": {
+                        "inverted": true,
+                        "value": "GetArgumentAsBoolean"
+                      },
+                      "parameters": [
+                        "\"Activate\""
+                      ]
+                    }
+                  ],
+                  "actions": [
+                    {
+                      "type": {
+                        "value": "Physics3D::Physics3D::SetPropertyGroup5"
+                      },
+                      "parameters": [
+                        "Object",
+                        "Behavior",
+                        "no"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "parameters": [
+            {
+              "description": "Object",
+              "name": "Object",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "object"
+            },
+            {
+              "description": "Behavior",
+              "name": "Behavior",
+              "supplementaryInformation": "Physics3D::Physics3D",
+              "type": "behavior"
+            },
+            {
+              "description": "Layer",
+              "name": "Layer",
+              "supplementaryInformation": "[\"Layer #1\",\"Layer #2\",\"Layer #3\",\"Layer #4\",\"Layer #5\"]",
+              "type": "stringWithSelector"
+            },
+            {
+              "description": "Activate",
+              "name": "Activate",
+              "type": "trueorfalse"
+            }
+          ],
+          "objectGroups": []
+        },
+        {
+          "description": "Set collider layer activate",
+          "fullName": "Set collider layer activate",
+          "functionType": "Action",
+          "group": "Layers and masks",
+          "name": "SetMask",
+          "private": true,
+          "sentence": "Set _PARAM0_ layer _PARAM2_ activate _PARAM3_",
+          "events": [
+            {
+              "folded": true,
+              "type": "BuiltinCommonInstructions::Standard",
+              "conditions": [
+                {
+                  "type": {
+                    "value": "CompareArgumentAsString"
+                  },
+                  "parameters": [
+                    "\"Mask\"",
+                    "=",
+                    "\"Mask #1\""
+                  ]
+                }
+              ],
+              "actions": [],
+              "events": [
+                {
+                  "type": "BuiltinCommonInstructions::Standard",
+                  "conditions": [
+                    {
+                      "type": {
+                        "value": "GetArgumentAsBoolean"
+                      },
+                      "parameters": [
+                        "\"Activate\""
+                      ]
+                    }
+                  ],
+                  "actions": [
+                    {
+                      "type": {
+                        "value": "Physics3D::Physics3D::SetPropertyMask1"
+                      },
+                      "parameters": [
+                        "Object",
+                        "Behavior",
+                        "yes"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "BuiltinCommonInstructions::Standard",
+                  "conditions": [
+                    {
+                      "type": {
+                        "inverted": true,
+                        "value": "GetArgumentAsBoolean"
+                      },
+                      "parameters": [
+                        "\"Activate\""
+                      ]
+                    }
+                  ],
+                  "actions": [
+                    {
+                      "type": {
+                        "value": "Physics3D::Physics3D::SetPropertyMask1"
+                      },
+                      "parameters": [
+                        "Object",
+                        "Behavior",
+                        "no"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "folded": true,
+              "type": "BuiltinCommonInstructions::Standard",
+              "conditions": [
+                {
+                  "type": {
+                    "value": "CompareArgumentAsString"
+                  },
+                  "parameters": [
+                    "\"Mask\"",
+                    "=",
+                    "\"Mask #2\""
+                  ]
+                }
+              ],
+              "actions": [],
+              "events": [
+                {
+                  "type": "BuiltinCommonInstructions::Standard",
+                  "conditions": [
+                    {
+                      "type": {
+                        "value": "GetArgumentAsBoolean"
+                      },
+                      "parameters": [
+                        "\"Activate\""
+                      ]
+                    }
+                  ],
+                  "actions": [
+                    {
+                      "type": {
+                        "value": "Physics3D::Physics3D::SetPropertyMask2"
+                      },
+                      "parameters": [
+                        "Object",
+                        "Behavior",
+                        "yes"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "BuiltinCommonInstructions::Standard",
+                  "conditions": [
+                    {
+                      "type": {
+                        "inverted": true,
+                        "value": "GetArgumentAsBoolean"
+                      },
+                      "parameters": [
+                        "\"Activate\""
+                      ]
+                    }
+                  ],
+                  "actions": [
+                    {
+                      "type": {
+                        "value": "Physics3D::Physics3D::SetPropertyMask2"
+                      },
+                      "parameters": [
+                        "Object",
+                        "Behavior",
+                        "no"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "folded": true,
+              "type": "BuiltinCommonInstructions::Standard",
+              "conditions": [
+                {
+                  "type": {
+                    "value": "CompareArgumentAsString"
+                  },
+                  "parameters": [
+                    "\"Mask\"",
+                    "=",
+                    "\"Mask #3\""
+                  ]
+                }
+              ],
+              "actions": [],
+              "events": [
+                {
+                  "type": "BuiltinCommonInstructions::Standard",
+                  "conditions": [
+                    {
+                      "type": {
+                        "value": "GetArgumentAsBoolean"
+                      },
+                      "parameters": [
+                        "\"Activate\""
+                      ]
+                    }
+                  ],
+                  "actions": [
+                    {
+                      "type": {
+                        "value": "Physics3D::Physics3D::SetPropertyMask3"
+                      },
+                      "parameters": [
+                        "Object",
+                        "Behavior",
+                        "yes"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "BuiltinCommonInstructions::Standard",
+                  "conditions": [
+                    {
+                      "type": {
+                        "inverted": true,
+                        "value": "GetArgumentAsBoolean"
+                      },
+                      "parameters": [
+                        "\"Activate\""
+                      ]
+                    }
+                  ],
+                  "actions": [
+                    {
+                      "type": {
+                        "value": "Physics3D::Physics3D::SetPropertyMask3"
+                      },
+                      "parameters": [
+                        "Object",
+                        "Behavior",
+                        "no"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "folded": true,
+              "type": "BuiltinCommonInstructions::Standard",
+              "conditions": [
+                {
+                  "type": {
+                    "value": "CompareArgumentAsString"
+                  },
+                  "parameters": [
+                    "\"Mask\"",
+                    "=",
+                    "\"Mask #4\""
+                  ]
+                }
+              ],
+              "actions": [],
+              "events": [
+                {
+                  "type": "BuiltinCommonInstructions::Standard",
+                  "conditions": [
+                    {
+                      "type": {
+                        "value": "GetArgumentAsBoolean"
+                      },
+                      "parameters": [
+                        "\"Activate\""
+                      ]
+                    }
+                  ],
+                  "actions": [
+                    {
+                      "type": {
+                        "value": "Physics3D::Physics3D::SetPropertyMask4"
+                      },
+                      "parameters": [
+                        "Object",
+                        "Behavior",
+                        "yes"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "BuiltinCommonInstructions::Standard",
+                  "conditions": [
+                    {
+                      "type": {
+                        "inverted": true,
+                        "value": "GetArgumentAsBoolean"
+                      },
+                      "parameters": [
+                        "\"Activate\""
+                      ]
+                    }
+                  ],
+                  "actions": [
+                    {
+                      "type": {
+                        "value": "Physics3D::Physics3D::SetPropertyMask4"
+                      },
+                      "parameters": [
+                        "Object",
+                        "Behavior",
+                        "no"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "folded": true,
+              "type": "BuiltinCommonInstructions::Standard",
+              "conditions": [
+                {
+                  "type": {
+                    "value": "CompareArgumentAsString"
+                  },
+                  "parameters": [
+                    "\"Mask\"",
+                    "=",
+                    "\"Mask #5\""
+                  ]
+                }
+              ],
+              "actions": [],
+              "events": [
+                {
+                  "type": "BuiltinCommonInstructions::Standard",
+                  "conditions": [
+                    {
+                      "type": {
+                        "value": "GetArgumentAsBoolean"
+                      },
+                      "parameters": [
+                        "\"Activate\""
+                      ]
+                    }
+                  ],
+                  "actions": [
+                    {
+                      "type": {
+                        "value": "Physics3D::Physics3D::SetPropertyMask5"
+                      },
+                      "parameters": [
+                        "Object",
+                        "Behavior",
+                        "yes"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "BuiltinCommonInstructions::Standard",
+                  "conditions": [
+                    {
+                      "type": {
+                        "inverted": true,
+                        "value": "GetArgumentAsBoolean"
+                      },
+                      "parameters": [
+                        "\"Activate\""
+                      ]
+                    }
+                  ],
+                  "actions": [
+                    {
+                      "type": {
+                        "value": "Physics3D::Physics3D::SetPropertyMask5"
+                      },
+                      "parameters": [
+                        "Object",
+                        "Behavior",
+                        "no"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "parameters": [
+            {
+              "description": "Object",
+              "name": "Object",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "object"
+            },
+            {
+              "description": "Behavior",
+              "name": "Behavior",
+              "supplementaryInformation": "Physics3D::Physics3D",
+              "type": "behavior"
+            },
+            {
+              "description": "Layer",
+              "name": "Mask",
+              "supplementaryInformation": "[\"Mask #1\",\"Mask #2\",\"Mask #3\",\"Mask #4\",\"Mask #5\"]",
+              "type": "stringWithSelector"
+            },
+            {
+              "description": "Activate",
+              "name": "Activate",
+              "type": "trueorfalse"
+            }
+          ],
+          "objectGroups": []
+        },
+        {
           "fullName": "Get X Velocity",
           "functionType": "Expression",
+          "group": "Velocity",
           "name": "XVelocity",
           "sentence": "",
           "events": [
@@ -16181,6 +17415,7 @@
         {
           "fullName": "Get Y Velocity",
           "functionType": "Expression",
+          "group": "Velocity",
           "name": "YVelocity",
           "sentence": "",
           "events": [
@@ -16222,6 +17457,7 @@
         {
           "fullName": "Get Z Velocity",
           "functionType": "Expression",
+          "group": "Velocity",
           "name": "ZVelocity",
           "sentence": "",
           "events": [
@@ -16259,6 +17495,216 @@
             }
           ],
           "objectGroups": []
+        },
+        {
+          "fullName": "Get Mass",
+          "functionType": "Expression",
+          "group": "Properties",
+          "name": "Mass",
+          "sentence": "",
+          "events": [
+            {
+              "type": "BuiltinCommonInstructions::JsCode",
+              "inlineCode": [
+                "const body = objects[0].collider;",
+                "if(body){",
+                "const value = body.mass;",
+                "eventsFunctionContext.returnValue = value;",
+                "}",
+                "",
+                ""
+              ],
+              "parameterObjects": "Object",
+              "useStrict": true,
+              "eventsSheetExpanded": false
+            }
+          ],
+          "expressionType": {
+            "type": "expression"
+          },
+          "parameters": [
+            {
+              "description": "Object",
+              "name": "Object",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "object"
+            },
+            {
+              "description": "Behavior",
+              "name": "Behavior",
+              "supplementaryInformation": "Physics3D::Physics3D",
+              "type": "behavior"
+            }
+          ],
+          "objectGroups": []
+        },
+        {
+          "fullName": "Get Friction",
+          "functionType": "Expression",
+          "group": "Properties",
+          "name": "Friction",
+          "sentence": "",
+          "events": [
+            {
+              "type": "BuiltinCommonInstructions::JsCode",
+              "inlineCode": [
+                "const body = objects[0].collider;",
+                "if(body){",
+                "const value = body.friction;",
+                "eventsFunctionContext.returnValue = value;",
+                "}",
+                "",
+                ""
+              ],
+              "parameterObjects": "Object",
+              "useStrict": true,
+              "eventsSheetExpanded": false
+            }
+          ],
+          "expressionType": {
+            "type": "expression"
+          },
+          "parameters": [
+            {
+              "description": "Object",
+              "name": "Object",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "object"
+            },
+            {
+              "description": "Behavior",
+              "name": "Behavior",
+              "supplementaryInformation": "Physics3D::Physics3D",
+              "type": "behavior"
+            }
+          ],
+          "objectGroups": []
+        },
+        {
+          "fullName": "Get Restitution",
+          "functionType": "Expression",
+          "group": "Properties",
+          "name": "Restitution",
+          "sentence": "",
+          "events": [
+            {
+              "type": "BuiltinCommonInstructions::JsCode",
+              "inlineCode": [
+                "const body = objects[0].collider;",
+                "if(body){",
+                "const value = body.restitution;",
+                "eventsFunctionContext.returnValue = value;",
+                "}",
+                "",
+                ""
+              ],
+              "parameterObjects": "Object",
+              "useStrict": true,
+              "eventsSheetExpanded": false
+            }
+          ],
+          "expressionType": {
+            "type": "expression"
+          },
+          "parameters": [
+            {
+              "description": "Object",
+              "name": "Object",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "object"
+            },
+            {
+              "description": "Behavior",
+              "name": "Behavior",
+              "supplementaryInformation": "Physics3D::Physics3D",
+              "type": "behavior"
+            }
+          ],
+          "objectGroups": []
+        },
+        {
+          "fullName": "Get Angular damping",
+          "functionType": "Expression",
+          "group": "Damping",
+          "name": "AngularDamping",
+          "sentence": "",
+          "events": [
+            {
+              "type": "BuiltinCommonInstructions::JsCode",
+              "inlineCode": [
+                "const body = objects[0].collider;",
+                "if(body){",
+                "const value = body.angularDamping;",
+                "eventsFunctionContext.returnValue = value;",
+                "}",
+                "",
+                ""
+              ],
+              "parameterObjects": "Object",
+              "useStrict": true,
+              "eventsSheetExpanded": false
+            }
+          ],
+          "expressionType": {
+            "type": "expression"
+          },
+          "parameters": [
+            {
+              "description": "Object",
+              "name": "Object",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "object"
+            },
+            {
+              "description": "Behavior",
+              "name": "Behavior",
+              "supplementaryInformation": "Physics3D::Physics3D",
+              "type": "behavior"
+            }
+          ],
+          "objectGroups": []
+        },
+        {
+          "fullName": "Get Linear damping",
+          "functionType": "Expression",
+          "group": "Damping",
+          "name": "LinearDamping",
+          "sentence": "",
+          "events": [
+            {
+              "type": "BuiltinCommonInstructions::JsCode",
+              "inlineCode": [
+                "const body = objects[0].collider;",
+                "if(body){",
+                "const value = body.linearDamping;",
+                "eventsFunctionContext.returnValue = value;",
+                "}",
+                "",
+                ""
+              ],
+              "parameterObjects": "Object",
+              "useStrict": true,
+              "eventsSheetExpanded": false
+            }
+          ],
+          "expressionType": {
+            "type": "expression"
+          },
+          "parameters": [
+            {
+              "description": "Object",
+              "name": "Object",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "object"
+            },
+            {
+              "description": "Behavior",
+              "name": "Behavior",
+              "supplementaryInformation": "Physics3D::Physics3D",
+              "type": "behavior"
+            }
+          ],
+          "objectGroups": []
         }
       ],
       "propertyDescriptors": [
@@ -16267,7 +17713,7 @@
           "type": "Number",
           "unit": "Dimensionless",
           "label": "Mass",
-          "description": "Set to 0 for a static object",
+          "description": "",
           "group": "",
           "extraInformation": [],
           "name": "Mass"
@@ -16291,6 +17737,39 @@
           "group": "",
           "extraInformation": [],
           "name": "Restitution"
+        },
+        {
+          "value": "0",
+          "type": "Number",
+          "unit": "Dimensionless",
+          "label": "Linear damping (0-1)",
+          "description": "",
+          "group": "Damping",
+          "extraInformation": [],
+          "name": "LinearDamping"
+        },
+        {
+          "value": "0",
+          "type": "Number",
+          "unit": "Dimensionless",
+          "label": "Angular damping (0-1)",
+          "description": "",
+          "group": "Damping",
+          "extraInformation": [],
+          "name": "AngularDamping"
+        },
+        {
+          "value": "Dynamic",
+          "type": "Choice",
+          "label": "Type",
+          "description": "",
+          "group": "",
+          "extraInformation": [
+            "Dynamic",
+            "Static",
+            "Kinematic"
+          ],
+          "name": "Type"
         },
         {
           "value": "true",
@@ -16461,6 +17940,7 @@
                 "",
                 "const angleRad = angleDeg * (Math.PI / 180);",
                 "",
+                "if(boxBody){",
                 "const directionX = Math.cos(angleRad);",
                 "const directionY = Math.sin(angleRad);",
                 "const direction = new CANNON.Vec3(directionX * moveDistance, directionY * moveDistance, 0);",
@@ -16469,7 +17949,7 @@
                 "boxBody.velocity.y += direction.y;",
                 "",
                 "const maxSpeed = moveDistance;",
-                "boxBody.material.friction = 0.1;",
+                "//boxBody.material.friction = 0.1;",
                 "",
                 "if (boxBody.velocity.length() > maxSpeed) {",
                 "    const velocityXY = new CANNON.Vec3(boxBody.velocity.x, boxBody.velocity.y, 0);",
@@ -16477,7 +17957,7 @@
                 "    boxBody.velocity.x = velocityXY.x * maxSpeed;",
                 "    boxBody.velocity.y = velocityXY.y * maxSpeed;",
                 "}",
-                ""
+                "}"
               ],
               "parameterObjects": "Object",
               "useStrict": true,
