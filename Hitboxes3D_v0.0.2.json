@@ -7,10 +7,13 @@
   "iconUrl": "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz48IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9HcmFwaGljcy9TVkcvMS4xL0RURC9zdmcxMS5kdGQiPjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0ibWRpLWFscGhhLWgtYm94IiB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTksN1YxN0gxMVYxM0gxM1YxN0gxNVY3SDEzVjExSDExVjdIOU01LDNIMTlBMiwyIDAgMCwxIDIxLDVWMTlBMiwyIDAgMCwxIDE5LDIxSDVBMiwyIDAgMCwxIDMsMTlWNUEyLDIgMCAwLDEgNSwzWiIgLz48L3N2Zz4=",
   "name": "Hitboxes3D",
   "previewIconUrl": "https://asset-resources.gdevelop.io/public-resources/Icons/6e120b858fce8993df52cdf464ea0b0d46249995c898ba402efde13edb123bba_alpha-h-box.svg",
-  "shortDescription": "",
+  "shortDescription": "Determining collision between hitboxes (colliders) or applying raycasting to them",
   "version": "0.0.2",
-  "description": "",
-  "tags": [],
+  "description": "Determining collision between hitboxes (colliders) or applying raycasting to them can be useful for dividing characters into regions, for example, to apply different damage to different parts of the body. Hitboxes can be attached to bones if the character has skeletal animation.",
+  "tags": [
+    "3D",
+    "collision"
+  ],
   "authorIds": [
     "l2OaORwcgyX7y4HQY2dHPmdTuDj2"
   ],
@@ -617,7 +620,7 @@
           "inlineCode": [
             "const identifier = eventsFunctionContext.getArgument(\"Collider1\");",
             "const pointX = eventsFunctionContext.getArgument(\"X\");",
-            "const pointY = eventsFunctionContext.getArgument(\"Y\")*-1;",
+            "const pointY = eventsFunctionContext.getArgument(\"Y\");",
             "const pointZ = eventsFunctionContext.getArgument(\"Z\");",
             "",
             "if (objects[0] && objects[0].colliders && objects[0].colliders[identifier]) {",
@@ -628,7 +631,7 @@
             "        const boundingBox = new THREE.Box3().setFromObject(collider);",
             "",
             "        // Проверяем, содержится ли точка внутри bounding box",
-            "        if (boundingBox.containsPoint(new THREE.Vector3(pointX, pointY, pointZ))) {",
+            "        if (boundingBox.containsPoint(new THREE.Vector3(pointX, pointY * -1, pointZ))) {",
             "            eventsFunctionContext.returnValue = true;",
             "        } else {",
             "            eventsFunctionContext.returnValue = false;",
