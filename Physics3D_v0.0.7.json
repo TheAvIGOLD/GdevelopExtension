@@ -8,7 +8,7 @@
   "name": "Physics3D",
   "previewIconUrl": "https://asset-resources.gdevelop.io/public-resources/Icons/2cbc7d01420084b3a820e1cbc6a894823de82a3c5fe02ac7b4a9615a226df169_cube-send.svg",
   "shortDescription": "",
-  "version": "0.0.5",
+  "version": "0.0.7",
   "description": "",
   "tags": [
     "3D"
@@ -13774,8 +13774,8 @@
                 "const world = new CANNON.World();",
                 "world.gravity.set(0, 0, -98);",
                 "world.allowSleep = true",
-                "world.broadphase = new CANNON.SAPBroadphase(world);// Выбор алгоритма для обнаружения столкновений",
-                "world.solver.iterations = 10; // Количество итераций для решения столкновений",
+                "world.broadphase = new CANNON.SAPBroadphase(world);",
+                "world.solver.iterations = 10;",
                 "",
                 "",
                 "const fixedTimeStep = 1 / 60.0;",
@@ -14791,8 +14791,8 @@
   ],
   "eventsBasedBehaviors": [
     {
-      "description": "Behavior enabling the creation of physical colliders for 3D objects.",
-      "fullName": "Physics3D",
+      "description": "Behavior enabling the creation of physical body for 3D objects.",
+      "fullName": "Physics 3D Body",
       "name": "Physics3D",
       "objectType": "Scene3D::Model3DObject",
       "eventsFunctions": [
@@ -14836,12 +14836,12 @@
           "objectGroups": []
         },
         {
-          "description": "Create a box collider. (Origin point is always located at the center of the collider.)",
-          "fullName": "Create Box collider",
+          "description": "Create a box shape ",
+          "fullName": "Create Box shape",
           "functionType": "Action",
-          "group": "Colliders",
+          "group": "Physics 3D Shapes",
           "name": "BoxCollider",
-          "sentence": "Create Box collider_PARAM0_ Width: _PARAM2_, Height: _PARAM3_, Depth: _PARAM4_, Color: _PARAM5_, Fixed rotation: _PARAM6_, Visible: _PARAM7_",
+          "sentence": "Create Box shape _PARAM0_ _PARAM2_ x _PARAM3_ x _PARAM4_, offset  _PARAM5_;_PARAM6_;_PARAM7_, Color _PARAM8_, Visible _PARAM9_",
           "events": [
             {
               "type": "BuiltinCommonInstructions::JsCode",
@@ -14853,14 +14853,19 @@
                 "const behaviorName = eventsFunctionContext.getBehaviorName(\"Behavior\");",
                 "const behavior = objects[0].getBehavior(behaviorName);",
                 "",
+                "const width = eventsFunctionContext.getArgument(\"Width\") / 2;",
+                "const height = eventsFunctionContext.getArgument(\"Height\") / 2;",
+                "const depth = eventsFunctionContext.getArgument(\"Depth\") / 2;",
+                "const visible = eventsFunctionContext.getArgument(\"Visible\");",
+                "const offsetX = eventsFunctionContext.getArgument(\"OffsetX\");",
+                "const offsetY = eventsFunctionContext.getArgument(\"OffsetY\");",
+                "const offsetZ = eventsFunctionContext.getArgument(\"OffsetZ\");",
+                "const type = behavior._getType();",
                 "",
+                "const boxOffset = new CANNON.Vec3(offsetX,offsetY,offsetZ);",
                 "",
                 "if (!objects[0].collider) {",
-                "    const width = eventsFunctionContext.getArgument(\"Width\") / 2;",
-                "    const height = eventsFunctionContext.getArgument(\"Height\") / 2;",
-                "    const depth = eventsFunctionContext.getArgument(\"Depth\") / 2;",
-                "    const visible = eventsFunctionContext.getArgument(\"Visible\");",
-                "    const type = behavior._getType();",
+                "",
                 "",
                 "    const boxShape = new CANNON.Box(new CANNON.Vec3(width, height, depth));",
                 "    const boxBody = new CANNON.Body({ mass: behavior._getMass() });",
@@ -14872,7 +14877,8 @@
                 "",
                 "    boxBody.position.set(objects[0].getX(), objects[0].getY(), objects[0].getZ()); ",
                 "    boxBody.quaternion.copy(objects[0].get3DRendererObject().quaternion);",
-                "    boxBody.fixedRotation = eventsFunctionContext.getArgument(\"FixedRotation\");",
+                "    boxBody.fixedRotation = behavior._getFixedRotation();",
+                "    boxBody.allowSleep = behavior._getSleep();",
                 "",
                 "    boxBody.linearDamping = behavior._getLinearDamping();",
                 "    boxBody.angularDamping = behavior._getAngularDamping();",
@@ -14923,13 +14929,26 @@
                 "    }",
                 "",
                 "",
-                "    boxBody.addShape(boxShape);",
+                "    boxBody.addShape(boxShape, boxOffset);",
                 "    world.addBody(boxBody);",
                 "",
                 "    objectsArray.push({ object: objects[0], body: boxBody });",
                 "    objects[0].collider = boxBody;",
                 "",
-                "// debug",
+                "    debugCreate();",
+                "",
+                "    ",
+                "} else {",
+                "    const boxBody = objects[0].collider;",
+                "    const boxShape = new CANNON.Box(new CANNON.Vec3(width, height, depth));",
+                "",
+                "    boxBody.addShape(boxShape, boxOffset);",
+                "",
+                "    debugCreate();",
+                "",
+                "}",
+                "",
+                "function debugCreate() {",
                 "    const boxDebug = new THREE.BoxGeometry(width*2, height*2, depth*2);",
                 "    const rgbColorGD = gdjs.rgbOrHexToRGBColor(eventsFunctionContext.getArgument(\"Color\"));",
                 "    const rgbColor = new THREE.Color(\"rgb(\" + rgbColorGD[0] + \", \" + rgbColorGD[1] + \", \" + rgbColorGD[2] + \")\")",
@@ -14941,15 +14960,13 @@
                 "    });",
                 "    const debugMesh = new THREE.Mesh(boxDebug, material);",
                 "",
+                "    boxDebug.translate(offsetX, offsetY, offsetZ);",
                 "    debugMesh.position.set(objects[0].getX(), objects[0].getY(), objects[0].getZ());",
                 "    debugMesh.quaternion.copy(objects[0].get3DRendererObject().quaternion);",
-                "",
-                "",
+                "    ",
                 "    scene.add(debugMesh);",
                 "    objects[0].get3DRendererObject().attach(debugMesh);",
-                "    ",
-                "}",
-                ""
+                "}"
               ],
               "parameterObjects": "Object",
               "useStrict": true,
@@ -14985,14 +15002,25 @@
               "type": "expression"
             },
             {
+              "description": "Offset X",
+              "name": "OffsetX",
+              "type": "expression"
+            },
+            {
+              "description": "Offset Y",
+              "name": "OffsetY",
+              "type": "expression"
+            },
+            {
+              "description": "Offset Z",
+              "longDescription": "Important: The center of mass of the collider equal to the origin point of the object",
+              "name": "OffsetZ",
+              "type": "expression"
+            },
+            {
               "description": "Color",
               "name": "Color",
               "type": "color"
-            },
-            {
-              "description": "Fixed rotation",
-              "name": "FixedRotation",
-              "type": "trueorfalse"
             },
             {
               "description": "Visible",
@@ -15003,12 +15031,12 @@
           "objectGroups": []
         },
         {
-          "description": "Create a sphere collider. (Origin point is always located at the center of the collider.)",
-          "fullName": "Create Sphere collider",
+          "description": "Create a sphere shape",
+          "fullName": "Create Sphere shape",
           "functionType": "Action",
-          "group": "Colliders",
+          "group": "Physics 3D Shapes",
           "name": "SphereCollider",
-          "sentence": "Create Sphere collider _PARAM0_ Radius: _PARAM2_,Color: _PARAM3_, Fixed rotation: _PARAM4_, Visible: _PARAM5_",
+          "sentence": "Create Sphere shape _PARAM0_ Radius _PARAM2_, Offset _PARAM3_;_PARAM4_;_PARAM5_, Color: _PARAM6_, Visible: _PARAM7_",
           "events": [
             {
               "type": "BuiltinCommonInstructions::JsCode",
@@ -15020,10 +15048,16 @@
                 "    const behaviorName = eventsFunctionContext.getBehaviorName(\"Behavior\");",
                 "    const behavior = objects[0].getBehavior(behaviorName);",
                 "",
-                "if (!objects[0].collider) {",
                 "    const radius = eventsFunctionContext.getArgument(\"Radius\")/2;",
                 "    const visible = eventsFunctionContext.getArgument(\"Visible\");",
+                "    const offsetX = eventsFunctionContext.getArgument(\"OffsetX\");",
+                "    const offsetY = eventsFunctionContext.getArgument(\"OffsetY\");",
+                "    const offsetZ = eventsFunctionContext.getArgument(\"OffsetZ\");",
                 "    const type = behavior._getType();",
+                "",
+                "    const sphereOffset = new CANNON.Vec3(offsetX * -1,offsetY * -1,offsetZ);",
+                "",
+                "if (!objects[0].collider) {",
                 "",
                 "    const sphereShape = new CANNON.Sphere(radius);",
                 "    const sphereBody = new CANNON.Body({ mass: behavior._getMass() });",
@@ -15035,7 +15069,8 @@
                 "",
                 "    sphereBody.position.set(objects[0].getX(), objects[0].getY(), objects[0].getZ());",
                 "    sphereBody.quaternion.copy(objects[0].get3DRendererObject().quaternion);",
-                "    sphereBody.fixedRotation = eventsFunctionContext.getArgument(\"FixedRotation\");",
+                "    sphereBody.fixedRotation = behavior._getFixedRotation();",
+                "    sphereBody.allowSleep = behavior._getSleep();",
                 "",
                 "    sphereBody.linearDamping = behavior._getLinearDamping();",
                 "    sphereBody.angularDamping = behavior._getAngularDamping();",
@@ -15084,13 +15119,27 @@
                 "        sphereBody.collisionFilterMask |= 16;",
                 "    }",
                 "",
-                "    sphereBody.addShape(sphereShape);",
+                "    sphereBody.addShape(sphereShape, sphereOffset);",
                 "    world.addBody(sphereBody);",
                 "",
                 "    objectsArray.push({ object: objects[0], body: sphereBody });",
                 "    objects[0].collider = sphereBody;",
                 "",
-                "// debug",
+                "    debugCreate();",
+                "",
+                "",
+                "} else {",
+                "    ",
+                "    const sphereShape = new CANNON.Sphere(radius);",
+                "    const sphereBody = objects[0].collider;",
+                "",
+                "    sphereBody.addShape(sphereShape, sphereOffset);",
+                "",
+                "    debugCreate();",
+                "",
+                "}",
+                "",
+                "function debugCreate() {",
                 "    const sphereDebug = new THREE.SphereGeometry(radius, 16, 16); ",
                 "    const rgbColorGD = gdjs.rgbOrHexToRGBColor(eventsFunctionContext.getArgument(\"Color\"));",
                 "    const rgbColor = new THREE.Color(\"rgb(\" + rgbColorGD[0] + \", \" + rgbColorGD[1] + \", \" + rgbColorGD[2] + \")\")",
@@ -15102,10 +15151,12 @@
                 "    });",
                 "    const debugMesh = new THREE.Mesh(sphereDebug, material);",
                 "",
+                "    sphereDebug.rotateX(Math.PI / 2);",
+                "",
+                "    sphereDebug.translate(offsetX, offsetY, offsetZ);",
                 "    debugMesh.position.set(objects[0].getX(), objects[0].getY(), objects[0].getZ());",
                 "    debugMesh.quaternion.copy(objects[0].get3DRendererObject().quaternion);",
-                "    debugMesh.rotateX(Math.PI / 2);",
-                "    debugMesh.rotateY(Math.PI / 2);",
+                "",
                 "",
                 "    scene.add(debugMesh);",
                 "    objects[0].get3DRendererObject().attach(debugMesh);",
@@ -15136,14 +15187,25 @@
               "type": "expression"
             },
             {
+              "description": "Offset X",
+              "name": "OffsetX",
+              "type": "expression"
+            },
+            {
+              "description": "Offset Y",
+              "name": "OffsetY",
+              "type": "expression"
+            },
+            {
+              "description": "Offset Z",
+              "longDescription": "Important: The center of mass of the collider remains to the origin point of the object",
+              "name": "OffsetZ",
+              "type": "expression"
+            },
+            {
               "description": "Color",
               "name": "Color",
               "type": "color"
-            },
-            {
-              "description": "Fixed rotation",
-              "name": "FixedRotation",
-              "type": "trueorfalse"
             },
             {
               "description": "Visible",
@@ -15154,12 +15216,12 @@
           "objectGroups": []
         },
         {
-          "description": "Create a сylinder collider. (Origin point is always located at the center of the collider.)",
-          "fullName": "Create Cylinder collider",
+          "description": "Create a сylinder shape",
+          "fullName": "Create Cylinder shape",
           "functionType": "Action",
-          "group": "Colliders",
+          "group": "Physics 3D Shapes",
           "name": "CylinderCollider",
-          "sentence": "Create Cylinder collider _PARAM0_ Radius: _PARAM2_, Height: _PARAM3_, Segments: _PARAM4_, Color: _PARAM5_, Fixed rotation: _PARAM6_, Visible: _PARAM7_",
+          "sentence": "Create Cylinder shape _PARAM0_ Radius _PARAM2_, Height _PARAM3_, Segments _PARAM4_, Offset _PARAM5_;_PARAM6_;_PARAM7_, Color: _PARAM8_, Visible: _PARAM9_",
           "events": [
             {
               "type": "BuiltinCommonInstructions::JsCode",
@@ -15170,14 +15232,19 @@
                 "    const objectsArray = runtimeScene._CannonJS.objects;",
                 "    const behaviorName = eventsFunctionContext.getBehaviorName(\"Behavior\");",
                 "    const behavior = objects[0].getBehavior(behaviorName);",
-                "    ",
                 "",
-                "if (!objects[0].collider) {",
                 "    const radius = eventsFunctionContext.getArgument(\"Radius\") / 2;",
                 "    const height = eventsFunctionContext.getArgument(\"Height\");",
                 "    const segments = eventsFunctionContext.getArgument(\"Segments\");",
                 "    const visible = eventsFunctionContext.getArgument(\"Visible\");",
                 "    const type = behavior._getType();",
+                "    ",
+                "    const offsetX = eventsFunctionContext.getArgument(\"OffsetX\");",
+                "    const offsetY = eventsFunctionContext.getArgument(\"OffsetY\");",
+                "    const offsetZ = eventsFunctionContext.getArgument(\"OffsetZ\");",
+                "    const cylOffset = new CANNON.Vec3(offsetX,offsetY,offsetZ);",
+                "",
+                "if (!objects[0].collider) {",
                 "",
                 "    const cylShape = new CANNON.Cylinder(radius, radius, height, segments); ",
                 "    const cylBody = new CANNON.Body({ mass: behavior._getMass() });",
@@ -15189,7 +15256,8 @@
                 "",
                 "    cylBody.position.set(objects[0].getX(), objects[0].getY(), objects[0].getZ());",
                 "    cylBody.quaternion.copy(objects[0].get3DRendererObject().quaternion);",
-                "    cylBody.fixedRotation = eventsFunctionContext.getArgument(\"FixedRotation\");",
+                "    cylBody.fixedRotation = behavior._getFixedRotation();",
+                "    cylBody.allowSleep = behavior._getSleep();",
                 "",
                 "    cylBody.linearDamping = behavior._getLinearDamping();",
                 "    cylBody.angularDamping = behavior._getAngularDamping();",
@@ -15238,14 +15306,25 @@
                 "        cylBody.collisionFilterMask |= 16;",
                 "    }",
                 "",
-                "    cylBody.addShape(cylShape);",
+                "    cylBody.addShape(cylShape, cylOffset);",
                 "    world.addBody(cylBody);",
                 "",
                 "    objectsArray.push({ object: objects[0], body: cylBody });",
                 "    objects[0].collider = cylBody;",
                 "",
-                "// debug",
-                "    const cylDebug = new THREE.CylinderGeometry(radius,radius,height,segments)",
+                "    debugCreate();",
+                "",
+                "}else {",
+                "    const cylShape = new CANNON.Cylinder(radius, radius, height, segments); ",
+                "    const cylBody = objects[0].collider;",
+                "",
+                "    cylBody.addShape(cylShape, cylOffset);",
+                "",
+                "    debugCreate()",
+                "}",
+                "",
+                "function debugCreate() {",
+                "    const cylDebug  = new THREE.CylinderGeometry(radius,radius,height,segments)",
                 "    const rgbColorGD = gdjs.rgbOrHexToRGBColor(eventsFunctionContext.getArgument(\"Color\"));",
                 "    const rgbColor = new THREE.Color(\"rgb(\" + rgbColorGD[0] + \", \" + rgbColorGD[1] + \", \" + rgbColorGD[2] + \")\")",
                 "",
@@ -15254,18 +15333,19 @@
                 "        wireframe: true,",
                 "        visible: visible ",
                 "    });",
+                "",
                 "    const debugMesh = new THREE.Mesh(cylDebug, material);",
-                "    ",
-                "    ",
+                "",
+                "    cylDebug.rotateX(Math.PI / 2);",
+                "",
+                "    cylDebug.translate(offsetX, offsetY, offsetZ);",
                 "    debugMesh.position.set(objects[0].getX(), objects[0].getY(), objects[0].getZ());",
                 "    debugMesh.quaternion.copy(objects[0].get3DRendererObject().quaternion);",
-                "    debugMesh.rotateX(Math.PI / 2);",
-                "    debugMesh.rotateY(Math.PI / 2);",
+                "",
                 "",
                 "   scene.add(debugMesh);",
                 "   objects[0].get3DRendererObject().attach(debugMesh);",
                 "",
-                "    ",
                 "}",
                 ""
               ],
@@ -15303,14 +15383,25 @@
               "type": "expression"
             },
             {
+              "description": "Offset X",
+              "name": "OffsetX",
+              "type": "expression"
+            },
+            {
+              "description": "Offset Y",
+              "name": "OffsetY",
+              "type": "expression"
+            },
+            {
+              "description": "OffsetZ",
+              "longDescription": "Important: The center of mass of the collider remains to the origin point of the object",
+              "name": "OffsetZ",
+              "type": "expression"
+            },
+            {
               "description": "Color",
               "name": "Color",
               "type": "color"
-            },
-            {
-              "description": "Fixed rotation",
-              "name": "FixedRotation",
-              "type": "trueorfalse"
             },
             {
               "description": "Visible",
@@ -15321,12 +15412,12 @@
           "objectGroups": []
         },
         {
-          "description": "Create a capsule collider. (Origin point is always located at the center of the collider.)",
-          "fullName": "Create Capsule collider",
+          "description": "Create a capsule shape",
+          "fullName": "Create Capsule shape",
           "functionType": "Action",
-          "group": "Colliders",
+          "group": "Physics 3D Shapes",
           "name": "CapsuleCollider",
-          "sentence": "Create Capsule collider _PARAM0_ Radius: _PARAM2_, Height: _PARAM3_, Color: _PARAM4_, Fixed rotation: _PARAM5_, Visible: _PARAM6_",
+          "sentence": "Create Capsule shape _PARAM0_ Radius: _PARAM2_, Height: _PARAM3_, Offset _PARAM4_;_PARAM5_;_PARAM6_, Color: _PARAM7_, Visible: _PARAM8_",
           "events": [
             {
               "type": "BuiltinCommonInstructions::JsCode",
@@ -15337,21 +15428,27 @@
                 "    const objectsArray = runtimeScene._CannonJS.objects;",
                 "    const behaviorName = eventsFunctionContext.getBehaviorName(\"Behavior\");",
                 "    const behavior = objects[0].getBehavior(behaviorName);",
-                "    ",
                 "",
-                "if (!objects[0].collider) {",
                 "    const radius = eventsFunctionContext.getArgument(\"Radius\") / 2;",
                 "    const height = eventsFunctionContext.getArgument(\"Height\");",
                 "    const massBody = eventsFunctionContext.getArgument(\"Mass\");",
                 "    const visible = eventsFunctionContext.getArgument(\"Visible\");",
                 "    const type = behavior._getType();",
                 "",
-                "    const cylShape = new CANNON.Cylinder(radius, radius, height - radius, 16);",
+                "    const offsetX = eventsFunctionContext.getArgument(\"OffsetX\");",
+                "    const offsetY = eventsFunctionContext.getArgument(\"OffsetY\");",
+                "    const offsetZ = eventsFunctionContext.getArgument(\"OffsetZ\");",
+                "",
+                "    const offsetCenter = new CANNON.Vec3(offsetX,offsetY,offsetZ);",
+                "    const offsetTop = new CANNON.Vec3(offsetX, offsetY, (height - radius * 2) / 2  + offsetZ);",
+                "    const offsetBottom = new CANNON.Vec3(offsetX, offsetY, (height - radius * 2) / 2 * -1 + offsetZ);",
+                "    ",
+                "",
+                "if (!objects[0].collider) {",
+                "",
+                "    const cylShape = new CANNON.Cylinder(radius, radius, height-radius, 16);",
                 "    const sphereShapeTop = new CANNON.Sphere(radius);",
                 "    const sphereShapeBottom = new CANNON.Sphere(radius);",
-                "",
-                "    const offsetTop = new CANNON.Vec3(0, 0, height / 2 - radius/2);",
-                "    const offsetBottom = new CANNON.Vec3(0, 0, (height / 2 - radius/2) * -1);",
                 "",
                 "    const cylBody = new CANNON.Body({ mass: behavior._getMass() });",
                 "",
@@ -15362,7 +15459,8 @@
                 "",
                 "    cylBody.position.set(objects[0].getX(), objects[0].getY(), objects[0].getZ());",
                 "    cylBody.quaternion.copy(objects[0].get3DRendererObject().quaternion);",
-                "    cylBody.fixedRotation = eventsFunctionContext.getArgument(\"FixedRotation\");",
+                "    cylBody.fixedRotation = behavior._getFixedRotation();",
+                "    cylBody.allowSleep = behavior._getSleep();",
                 "",
                 "    cylBody.linearDamping = behavior._getLinearDamping();",
                 "    cylBody.angularDamping = behavior._getAngularDamping();",
@@ -15411,7 +15509,7 @@
                 "        cylBody.collisionFilterMask |= 16;",
                 "    }",
                 "",
-                "    cylBody.addShape(cylShape);",
+                "    cylBody.addShape(cylShape, offsetCenter);",
                 "    cylBody.addShape(sphereShapeTop, offsetTop);",
                 "    cylBody.addShape(sphereShapeBottom, offsetBottom);",
                 "",
@@ -15420,8 +15518,23 @@
                 "    objectsArray.push({ object: objects[0], body: cylBody });",
                 "    objects[0].collider = cylBody;",
                 "",
-                "// debug",
-                "    const cylDebug = new THREE.CapsuleGeometry(radius,height-radius,3,16)",
+                "    debugCreate()",
+                "    ",
+                "} else{",
+                "    const cylBody = objects[0].collider",
+                "    const cylShape = new CANNON.Cylinder(radius, radius, height - radius, 16);",
+                "    const sphereShapeTop = new CANNON.Sphere(radius);",
+                "    const sphereShapeBottom = new CANNON.Sphere(radius);",
+                "",
+                "    cylBody.addShape(cylShape, offsetCenter);",
+                "    cylBody.addShape(sphereShapeTop, offsetTop);",
+                "    cylBody.addShape(sphereShapeBottom, offsetBottom);",
+                "",
+                "    debugCreate()",
+                "}",
+                "",
+                "function debugCreate() {",
+                "    const cylDebug = new THREE.CapsuleGeometry(radius,height-radius*2,3,16)",
                 "    const rgbColorGD = gdjs.rgbOrHexToRGBColor(eventsFunctionContext.getArgument(\"Color\"));",
                 "    const rgbColor = new THREE.Color(\"rgb(\" + rgbColorGD[0] + \", \" + rgbColorGD[1] + \", \" + rgbColorGD[2] + \")\")",
                 "",
@@ -15432,18 +15545,14 @@
                 "    });",
                 "    const debugMesh = new THREE.Mesh(cylDebug, material);",
                 "    ",
-                "    ",
+                "    cylDebug.rotateX(Math.PI / 2);",
+                "    cylDebug.translate(offsetX, offsetY, offsetZ);",
                 "    debugMesh.position.set(objects[0].getX(), objects[0].getY(), objects[0].getZ());",
                 "    debugMesh.quaternion.copy(objects[0].get3DRendererObject().quaternion);",
-                "    debugMesh.rotateX(Math.PI / 2);",
-                "    debugMesh.rotateY(Math.PI / 2);",
+                "",
                 "",
                 "   scene.add(debugMesh);",
                 "   objects[0].get3DRendererObject().attach(debugMesh);",
-                "",
-                "   debugMesh.userData.excludeFromCollision = true;",
-                "",
-                "    ",
                 "}",
                 ""
               ],
@@ -15476,14 +15585,25 @@
               "type": "expression"
             },
             {
+              "description": "Offset X",
+              "name": "OffsetX",
+              "type": "expression"
+            },
+            {
+              "description": "Offset Y",
+              "name": "OffsetY",
+              "type": "expression"
+            },
+            {
+              "description": "Offset Z",
+              "longDescription": "Important: The center of mass of the collider remains to the origin point of the object",
+              "name": "OffsetZ",
+              "type": "expression"
+            },
+            {
               "description": "Color",
               "name": "Color",
               "type": "color"
-            },
-            {
-              "description": "Fixed rotation",
-              "name": "FixedRotation",
-              "type": "trueorfalse"
             },
             {
               "description": "Visible",
@@ -15494,10 +15614,70 @@
           "objectGroups": []
         },
         {
-          "fullName": "Impulse",
+          "fullName": "Apply impulse",
           "functionType": "Action",
+          "group": "Physics 3D Forces & Impulses",
           "name": "Impulse",
-          "sentence": "Impulse _PARAM0_, length: _PARAM2_, Angles X: _PARAM3_, Y: _PARAM4_, Z: _PARAM5_",
+          "sentence": "Apply to _PARAM0_ an impulse _PARAM2_; _PARAM3_; _PARAM4_",
+          "events": [
+            {
+              "type": "BuiltinCommonInstructions::JsCode",
+              "inlineCode": [
+                "const boxBody = objects[0].collider;",
+                "const CANNON = gdjs._3DphysicsExt.get(\"CannonJS\");",
+                "",
+                "var comX = eventsFunctionContext.getArgument(\"ForceX\");",
+                "var comY = eventsFunctionContext.getArgument(\"ForceY\"); ",
+                "var comZ = eventsFunctionContext.getArgument(\"ForceZ\");",
+                "",
+                "var impulseDirection = new CANNON.Vec3(comX, comY, comZ);",
+                "",
+                "boxBody.wakeUp();",
+                "boxBody.applyImpulse(impulseDirection, boxBody.position);",
+                ""
+              ],
+              "parameterObjects": "Object",
+              "useStrict": true,
+              "eventsSheetExpanded": true
+            }
+          ],
+          "parameters": [
+            {
+              "description": "Object",
+              "name": "Object",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "object"
+            },
+            {
+              "description": "Behavior",
+              "name": "Behavior",
+              "supplementaryInformation": "Physics3D::Physics3D",
+              "type": "behavior"
+            },
+            {
+              "description": "X component",
+              "name": "ForceX",
+              "type": "expression"
+            },
+            {
+              "description": "Y component",
+              "name": "ForceY",
+              "type": "expression"
+            },
+            {
+              "description": "Z component",
+              "name": "ForceZ",
+              "type": "expression"
+            }
+          ],
+          "objectGroups": []
+        },
+        {
+          "fullName": "Apply impulse (angle)",
+          "functionType": "Action",
+          "group": "Physics 3D Forces & Impulses",
+          "name": "ImpulseAngle",
+          "sentence": "Apply to _PARAM0_ an impulse _PARAM2_ of angle _PARAM3_; _PARAM4_; _PARAM5_",
           "events": [
             {
               "type": "BuiltinCommonInstructions::JsCode",
@@ -15506,10 +15686,6 @@
                 "const CANNON = gdjs._3DphysicsExt.get(\"CannonJS\");",
                 "",
                 "var impulseForce = eventsFunctionContext.getArgument(\"Force\"); ",
-                "",
-                "var posX = eventsFunctionContext.getArgument(\"X\");",
-                "var posY = eventsFunctionContext.getArgument(\"Y\")*-1; ",
-                "var posZ = eventsFunctionContext.getArgument(\"Z\");",
                 "",
                 "var angleXDeg = eventsFunctionContext.getArgument(\"AngleX\");",
                 "var angleYDeg = eventsFunctionContext.getArgument(\"AngleY\"); ",
@@ -15573,12 +15749,337 @@
           "objectGroups": []
         },
         {
-          "description": "Set collider velocity",
-          "fullName": "Set collider velocity",
+          "fullName": "Apply impulse from point (Explosion)",
           "functionType": "Action",
-          "group": "3D Velocity",
+          "group": "Physics 3D Forces & Impulses",
+          "name": "ImpulseFromPoint",
+          "sentence": "Apply to _PARAM0_ an explosion impulse _PARAM2_ from point _PARAM3_; _PARAM4_; _PARAM5_ in radius _PARAM6_ _PARAM7_ ",
+          "events": [
+            {
+              "type": "BuiltinCommonInstructions::JsCode",
+              "inlineCode": [
+                "const boxBody = objects[0].collider;",
+                "const CANNON = gdjs._3DphysicsExt.get(\"CannonJS\");",
+                "",
+                "var impulseForce = eventsFunctionContext.getArgument(\"Force\"); ",
+                "var posX = eventsFunctionContext.getArgument(\"X\");",
+                "var posY = eventsFunctionContext.getArgument(\"Y\"); ",
+                "var posZ = eventsFunctionContext.getArgument(\"Z\");",
+                "var radiusCheck = eventsFunctionContext.getArgument(\"IfRadius\"); ",
+                "var explosionRadius = eventsFunctionContext.getArgument(\"Radius\"); ",
+                "",
+                "var explosionPoint = new CANNON.Vec3(posX, posY, posZ);",
+                "",
+                "var direction = boxBody.position.vsub(explosionPoint);",
+                "var distance = direction.length(); ",
+                "",
+                "let scaleFactor = 0; ",
+                "let scaledImpulseForce = 0;",
+                "",
+                "if (radiusCheck){",
+                "scaleFactor = 1 - Math.min(distance / explosionRadius, 1); ",
+                "scaledImpulseForce = impulseForce * scaleFactor;",
+                "} else {",
+                "scaledImpulseForce = impulseForce;",
+                "}",
+                "",
+                "direction.normalize();",
+                "",
+                "boxBody.wakeUp();",
+                "var impulse = direction.scale(scaledImpulseForce);",
+                "boxBody.applyImpulse(impulse, boxBody.position);",
+                ""
+              ],
+              "parameterObjects": "Object",
+              "useStrict": true,
+              "eventsSheetExpanded": true
+            }
+          ],
+          "parameters": [
+            {
+              "description": "Object",
+              "name": "Object",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "object"
+            },
+            {
+              "description": "Behavior",
+              "name": "Behavior",
+              "supplementaryInformation": "Physics3D::Physics3D",
+              "type": "behavior"
+            },
+            {
+              "description": "Length",
+              "name": "Force",
+              "type": "expression"
+            },
+            {
+              "description": "Point X",
+              "name": "X",
+              "type": "expression"
+            },
+            {
+              "description": "Point Y",
+              "name": "Y",
+              "type": "expression"
+            },
+            {
+              "description": "Point Z",
+              "name": "Z",
+              "type": "expression"
+            },
+            {
+              "defaultValue": "True",
+              "description": "In radius?",
+              "name": "IfRadius",
+              "optional": true,
+              "type": "trueorfalse"
+            },
+            {
+              "description": "Radius (if true)",
+              "name": "Radius",
+              "type": "expression"
+            }
+          ],
+          "objectGroups": []
+        },
+        {
+          "fullName": "Apply force",
+          "functionType": "Action",
+          "group": "Physics 3D Forces & Impulses",
+          "name": "Force",
+          "sentence": "Apply to _PARAM0_ a force _PARAM2_; _PARAM3_; _PARAM4_",
+          "events": [
+            {
+              "type": "BuiltinCommonInstructions::JsCode",
+              "inlineCode": [
+                "const boxBody = objects[0].collider;",
+                "const CANNON = gdjs._3DphysicsExt.get(\"CannonJS\");",
+                "",
+                "var comX = eventsFunctionContext.getArgument(\"ForceX\");",
+                "var comY = eventsFunctionContext.getArgument(\"ForceY\"); ",
+                "var comZ = eventsFunctionContext.getArgument(\"ForceZ\");",
+                "",
+                "var forceDirection = new CANNON.Vec3(comX, comY, comZ);",
+                "",
+                "boxBody.wakeUp();",
+                "boxBody.applyForce(forceDirection, boxBody.position);",
+                ""
+              ],
+              "parameterObjects": "Object",
+              "useStrict": true,
+              "eventsSheetExpanded": true
+            }
+          ],
+          "parameters": [
+            {
+              "description": "Object",
+              "name": "Object",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "object"
+            },
+            {
+              "description": "Behavior",
+              "name": "Behavior",
+              "supplementaryInformation": "Physics3D::Physics3D",
+              "type": "behavior"
+            },
+            {
+              "description": "X component",
+              "name": "ForceX",
+              "type": "expression"
+            },
+            {
+              "description": "Y component",
+              "name": "ForceY",
+              "type": "expression"
+            },
+            {
+              "description": "Z component",
+              "name": "ForceZ",
+              "type": "expression"
+            }
+          ],
+          "objectGroups": []
+        },
+        {
+          "fullName": "Apply force (angle)",
+          "functionType": "Action",
+          "group": "Physics 3D Forces & Impulses",
+          "name": "ForceAngle",
+          "sentence": "Apply to _PARAM0_ a force _PARAM2_ of angle _PARAM3_; _PARAM4_; _PARAM5_",
+          "events": [
+            {
+              "type": "BuiltinCommonInstructions::JsCode",
+              "inlineCode": [
+                "const boxBody = objects[0].collider;",
+                "const CANNON = gdjs._3DphysicsExt.get(\"CannonJS\");",
+                "",
+                "var forceLength = eventsFunctionContext.getArgument(\"Force\"); ",
+                "",
+                "var angleXDeg = eventsFunctionContext.getArgument(\"AngleX\");",
+                "var angleYDeg = eventsFunctionContext.getArgument(\"AngleY\"); ",
+                "var angleZDeg = eventsFunctionContext.getArgument(\"AngleZ\");",
+                "",
+                "var angleX = angleXDeg * (Math.PI / 180);",
+                "var angleY = angleYDeg * (Math.PI / 180); ",
+                "var angleZ = angleZDeg * (Math.PI / 180); ",
+                "",
+                "var directionX = Math.cos(angleZ) * Math.cos(angleY);",
+                "var directionY = Math.sin(angleZ) * Math.cos(angleY);",
+                "var directionZ = -Math.sin(angleY);",
+                "",
+                "var forceDirection = new CANNON.Vec3(directionX, directionY, directionZ);",
+                "",
+                "",
+                "boxBody.wakeUp();",
+                "forceDirection = forceDirection.scale(forceLength);",
+                "boxBody.applyForce(forceDirection, boxBody.position);",
+                ""
+              ],
+              "parameterObjects": "Object",
+              "useStrict": true,
+              "eventsSheetExpanded": true
+            }
+          ],
+          "parameters": [
+            {
+              "description": "Object",
+              "name": "Object",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "object"
+            },
+            {
+              "description": "Behavior",
+              "name": "Behavior",
+              "supplementaryInformation": "Physics3D::Physics3D",
+              "type": "behavior"
+            },
+            {
+              "description": "Length",
+              "name": "Force",
+              "type": "expression"
+            },
+            {
+              "description": "Angle X",
+              "name": "AngleX",
+              "type": "expression"
+            },
+            {
+              "description": "Angle Y",
+              "name": "AngleY",
+              "type": "expression"
+            },
+            {
+              "description": "Angle Z",
+              "name": "AngleZ",
+              "type": "expression"
+            }
+          ],
+          "objectGroups": []
+        },
+        {
+          "fullName": "Apply force from point (Explosion)",
+          "functionType": "Action",
+          "group": "Physics 3D Forces & Impulses",
+          "name": "ForceFromPoint",
+          "sentence": "Apply to _PARAM0_ an explosion force _PARAM2_ from point _PARAM3_; _PARAM4_; _PARAM5_ in radius _PARAM6_ _PARAM7_ ",
+          "events": [
+            {
+              "type": "BuiltinCommonInstructions::JsCode",
+              "inlineCode": [
+                "const boxBody = objects[0].collider;",
+                "const CANNON = gdjs._3DphysicsExt.get(\"CannonJS\");",
+                "",
+                "var forceLength = eventsFunctionContext.getArgument(\"Force\"); ",
+                "var posX = eventsFunctionContext.getArgument(\"X\");",
+                "var posY = eventsFunctionContext.getArgument(\"Y\"); ",
+                "var posZ = eventsFunctionContext.getArgument(\"Z\");",
+                "var radiusCheck = eventsFunctionContext.getArgument(\"IfRadius\"); ",
+                "var explosionRadius = eventsFunctionContext.getArgument(\"Radius\"); ",
+                "",
+                "var explosionPoint = new CANNON.Vec3(posX, posY, posZ);",
+                "",
+                "var direction = boxBody.position.vsub(explosionPoint);",
+                "var distance = direction.length(); ",
+                "",
+                "let scaleFactor = 0; ",
+                "let scaledForceLenght = 0;",
+                "",
+                "if (radiusCheck){",
+                "scaleFactor = 1 - Math.min(distance / explosionRadius, 1); ",
+                "scaledForceLenght = forceLength * scaleFactor;",
+                "} else {",
+                "scaledForceLenght = forceLength;",
+                "}",
+                "",
+                "direction.normalize();",
+                "",
+                "boxBody.wakeUp();",
+                "var force = direction.scale(scaledForceLenght);",
+                "boxBody.applyForce(force, boxBody.position);",
+                ""
+              ],
+              "parameterObjects": "Object",
+              "useStrict": true,
+              "eventsSheetExpanded": true
+            }
+          ],
+          "parameters": [
+            {
+              "description": "Object",
+              "name": "Object",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "object"
+            },
+            {
+              "description": "Behavior",
+              "name": "Behavior",
+              "supplementaryInformation": "Physics3D::Physics3D",
+              "type": "behavior"
+            },
+            {
+              "description": "Length",
+              "name": "Force",
+              "type": "expression"
+            },
+            {
+              "description": "Point X",
+              "name": "X",
+              "type": "expression"
+            },
+            {
+              "description": "Point Y",
+              "name": "Y",
+              "type": "expression"
+            },
+            {
+              "description": "Point Z",
+              "name": "Z",
+              "type": "expression"
+            },
+            {
+              "defaultValue": "True",
+              "description": "In radius?",
+              "name": "IfRadius",
+              "optional": true,
+              "type": "trueorfalse"
+            },
+            {
+              "description": "Radius (if true)",
+              "name": "Radius",
+              "type": "expression"
+            }
+          ],
+          "objectGroups": []
+        },
+        {
+          "description": "Set body velocity",
+          "fullName": "Set body velocity",
+          "functionType": "Action",
+          "group": "Physics 3D Velocity",
           "name": "SetVelocity",
-          "sentence": "Set velocity _PARAM0_ X: _PARAM2_, Y: _PARAM3_, Z: _PARAM4_",
+          "sentence": "Set velocity _PARAM0_ _PARAM2_;_PARAM3_;_PARAM4_",
           "events": [
             {
               "type": "BuiltinCommonInstructions::JsCode",
@@ -15630,12 +16131,12 @@
           "objectGroups": []
         },
         {
-          "description": "Set collider velocity by angle ",
-          "fullName": "Set collider velocity by angle ",
+          "description": "Set body velocity by angle ",
+          "fullName": "Set body velocity by angle ",
           "functionType": "Action",
-          "group": "3D Velocity",
+          "group": "Physics 3D Velocity",
           "name": "SetVelocityAngle",
-          "sentence": "Set velocity _PARAM0_ Value: _PARAM2_, Angles X: _PARAM3_, Y: _PARAM4_, Z: _PARAM5_",
+          "sentence": "Set velocity _PARAM0_ Value: _PARAM2_, Angles _PARAM3_;_PARAM4_;_PARAM5_",
           "events": [
             {
               "type": "BuiltinCommonInstructions::JsCode",
@@ -15704,10 +16205,10 @@
           "objectGroups": []
         },
         {
-          "description": "Set collider X velocity",
-          "fullName": "Set collider X velocity",
+          "description": "Set body X velocity",
+          "fullName": "Set body X velocity",
           "functionType": "Action",
-          "group": "3D Velocity",
+          "group": "Physics 3D Velocity",
           "name": "SetVelocityX",
           "sentence": "Set velocity _PARAM0_ X: _PARAM2_",
           "events": [
@@ -15749,10 +16250,10 @@
           "objectGroups": []
         },
         {
-          "description": "Set collider Y velocity",
-          "fullName": "Set collider Y velocity",
+          "description": "Set body Y velocity",
+          "fullName": "Set body Y velocity",
           "functionType": "Action",
-          "group": "3D Velocity",
+          "group": "Physics 3D Velocity",
           "name": "SetVelocityY",
           "sentence": "Set velocity _PARAM0_ Y: _PARAM2_",
           "events": [
@@ -15794,10 +16295,10 @@
           "objectGroups": []
         },
         {
-          "description": "Set collider Z velocity",
-          "fullName": "Set collider Z velocity",
+          "description": "Set body Z velocity",
+          "fullName": "Set body Z velocity",
           "functionType": "Action",
-          "group": "3D Velocity",
+          "group": "Physics 3D Velocity",
           "name": "SetVelocityZ",
           "sentence": "Set velocity _PARAM0_ Z: _PARAM2_",
           "events": [
@@ -15839,12 +16340,12 @@
           "objectGroups": []
         },
         {
-          "description": "Set collider rotation",
-          "fullName": "Set collider rotation",
+          "description": "Set body rotation",
+          "fullName": "Set body rotation",
           "functionType": "Action",
-          "group": "Rotation",
+          "group": "Angle",
           "name": "SetRotation",
-          "sentence": "Set _PARAM0_ rotation X: _PARAM2_, Y: _PARAM3_, Z: _PARAM4_",
+          "sentence": "Set _PARAM0_ rotation _PARAM2_;_PARAM3_;_PARAM4_",
           "events": [
             {
               "type": "BuiltinCommonInstructions::JsCode",
@@ -15903,12 +16404,12 @@
           "objectGroups": []
         },
         {
-          "description": "Set collider position",
-          "fullName": "Set collider position",
+          "description": "Set body position",
+          "fullName": "Set body position",
           "functionType": "Action",
           "group": "Position",
           "name": "SetPos",
-          "sentence": "Set _PARAM0_ X: _PARAM2_, Y: _PARAM3_, Z: _PARAM4_",
+          "sentence": "Set _PARAM0_ position _PARAM2_;_PARAM3_;_PARAM4_",
           "events": [
             {
               "type": "BuiltinCommonInstructions::JsCode",
@@ -15959,8 +16460,8 @@
           "objectGroups": []
         },
         {
-          "description": "Set collider X position",
-          "fullName": "Set collider X position",
+          "description": "Set body X position",
+          "fullName": "Set body X position",
           "functionType": "Action",
           "group": "Position",
           "name": "SetX",
@@ -16002,8 +16503,8 @@
           "objectGroups": []
         },
         {
-          "description": "Set collider Y position",
-          "fullName": "Set collider Y position",
+          "description": "Set body Y position",
+          "fullName": "Set body Y position",
           "functionType": "Action",
           "group": "Position",
           "name": "SetY",
@@ -16045,8 +16546,8 @@
           "objectGroups": []
         },
         {
-          "description": "Set collider Z position",
-          "fullName": "Set collider Z position",
+          "description": "Set body Z position",
+          "fullName": "Set body Z position",
           "functionType": "Action",
           "group": "Position",
           "name": "SetZ",
@@ -16088,11 +16589,133 @@
           "objectGroups": []
         },
         {
-          "description": "Dellete collider",
-          "fullName": "Dellete collider",
+          "description": "Put body to sleep",
+          "fullName": "Put body to sleep",
+          "functionType": "Action",
+          "group": "Physics 3D Sleep",
+          "name": "Sleep",
+          "sentence": "Put  _PARAM0_ to sleep",
+          "events": [
+            {
+              "type": "BuiltinCommonInstructions::JsCode",
+              "inlineCode": [
+                "const body = objects[0].collider;",
+                "",
+                "if (body) {",
+                "    body.sleep()",
+                "}",
+                ""
+              ],
+              "parameterObjects": "Object",
+              "useStrict": true,
+              "eventsSheetExpanded": false
+            }
+          ],
+          "parameters": [
+            {
+              "description": "Object",
+              "name": "Object",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "object"
+            },
+            {
+              "description": "Behavior",
+              "name": "Behavior",
+              "supplementaryInformation": "Physics3D::Physics3D",
+              "type": "behavior"
+            }
+          ],
+          "objectGroups": []
+        },
+        {
+          "description": "Set allow to sleep",
+          "fullName": "Set allow to sleep",
+          "functionType": "Action",
+          "group": "Physics 3D Sleep",
+          "name": "SetAllowSleep",
+          "sentence": "Set _PARAM0_ allow  to sleep _PARAM2_",
+          "events": [
+            {
+              "type": "BuiltinCommonInstructions::JsCode",
+              "inlineCode": [
+                "const body = objects[0].collider;",
+                "",
+                "if (body) {",
+                "    body.allowSleep = eventsFunctionContext.getArgument(\"Value\")",
+                "}",
+                ""
+              ],
+              "parameterObjects": "Object",
+              "useStrict": true,
+              "eventsSheetExpanded": false
+            }
+          ],
+          "parameters": [
+            {
+              "description": "Object",
+              "name": "Object",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "object"
+            },
+            {
+              "description": "Behavior",
+              "name": "Behavior",
+              "supplementaryInformation": "Physics3D::Physics3D",
+              "type": "behavior"
+            },
+            {
+              "description": "Value",
+              "name": "Value",
+              "type": "trueorfalse"
+            }
+          ],
+          "objectGroups": []
+        },
+        {
+          "description": "Wake up body",
+          "fullName": "Wake up body",
+          "functionType": "Action",
+          "group": "Physics 3D Sleep",
+          "name": "Wakeup",
+          "sentence": "Wake up _PARAM0_",
+          "events": [
+            {
+              "type": "BuiltinCommonInstructions::JsCode",
+              "inlineCode": [
+                "const body = objects[0].collider;",
+                "",
+                "if (body) {",
+                "    body.wakeUp()",
+                "}",
+                ""
+              ],
+              "parameterObjects": "Object",
+              "useStrict": true,
+              "eventsSheetExpanded": false
+            }
+          ],
+          "parameters": [
+            {
+              "description": "Object",
+              "name": "Object",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "object"
+            },
+            {
+              "description": "Behavior",
+              "name": "Behavior",
+              "supplementaryInformation": "Physics3D::Physics3D",
+              "type": "behavior"
+            }
+          ],
+          "objectGroups": []
+        },
+        {
+          "description": "Dellete body ",
+          "fullName": "Dellete body ",
           "functionType": "Action",
           "name": "DelCollider",
-          "sentence": "Dellete collider _PARAM0_",
+          "sentence": "Dellete body _PARAM0_",
           "events": [
             {
               "type": "BuiltinCommonInstructions::JsCode",
@@ -16131,7 +16754,7 @@
           "description": "Create Rigid join",
           "fullName": "Create Rigid join",
           "functionType": "Action",
-          "group": "3D Joins",
+          "group": "Physics 3D Joins",
           "name": "RigidConstraint",
           "sentence": "Create a rigid join_PARAM0_ and _PARAM2_ with max force: _PARAM3_",
           "events": [
@@ -16193,7 +16816,7 @@
           "description": "Create Revolute join",
           "fullName": "Create Revolute join",
           "functionType": "Action",
-          "group": "3D Joins",
+          "group": "Physics 3D Joins",
           "name": "HingeConstraint",
           "sentence": "Create a Revolute join _PARAM0_ offset X: _PARAM2_, Y: _PARAM3_, Z: _PARAM4_, Axes: _PARAM5_ and _PARAM6_ offset X: _PARAM7_, Y: _PARAM8_, Z: _PARAM9_, Axes: _PARAM10_ with max force: _PARAM11_",
           "events": [
@@ -16245,6 +16868,7 @@
                 "}",
                 "",
                 "var hingeConstraint = new CANNON.HingeConstraint(bodyA, bodyB, {",
+                "    collideConnected: false,",
                 "    pivotA: new CANNON.Vec3(pivotXA, pivotYA, pivotZA), ",
                 "    pivotB: new CANNON.Vec3(pivotXB, pivotYB, pivotZB), ",
                 "    axisA: axisA,",
@@ -16252,7 +16876,7 @@
                 "    maxForce: eventsFunctionContext.getArgument(\"MaxForce\")",
                 "});",
                 "",
-                "// Добавление соединения к миру",
+                "",
                 "world.addConstraint(hingeConstraint);",
                 "}",
                 ""
@@ -16332,10 +16956,10 @@
           "objectGroups": []
         },
         {
-          "description": "Set collider mass",
-          "fullName": "Set collider mass",
+          "description": "Set body mass",
+          "fullName": "Set body mass",
           "functionType": "Action",
-          "group": "Collider properties",
+          "group": "Physics 3D Body properties",
           "name": "SetMass",
           "sentence": "Set _PARAM0_ mass _PARAM2_",
           "events": [
@@ -16345,7 +16969,7 @@
                 "const body = objects[0].collider;",
                 "",
                 "if(body){",
-                "body.mass = eventsFunctionContext.getObjects(\"Value\");",
+                "body.mass = eventsFunctionContext.getArgument(\"Value\");",
                 "}",
                 ""
               ],
@@ -16376,10 +17000,10 @@
           "objectGroups": []
         },
         {
-          "description": "Set collider friction",
-          "fullName": "Set collider friction",
+          "description": "Set body friction",
+          "fullName": "Set body  friction",
           "functionType": "Action",
-          "group": "Collider properties",
+          "group": "Physics 3D Body properties",
           "name": "SetFriction",
           "sentence": "Set _PARAM0_ friction _PARAM2_",
           "events": [
@@ -16389,7 +17013,7 @@
                 "const body = objects[0].collider;",
                 "",
                 "if(body){",
-                "body.friction = eventsFunctionContext.getObjects(\"Value\");",
+                "body.friction = eventsFunctionContext.getArgument(\"Value\");",
                 "}",
                 ""
               ],
@@ -16420,10 +17044,10 @@
           "objectGroups": []
         },
         {
-          "description": "Set collider restitution",
-          "fullName": "Set collider restitution",
+          "description": "Set body restitution",
+          "fullName": "Set body restitution",
           "functionType": "Action",
-          "group": "Collider properties",
+          "group": "Physics 3D Body properties",
           "name": "SetRestitution",
           "sentence": "Set _PARAM0_ restitution _PARAM2_",
           "events": [
@@ -16433,7 +17057,7 @@
                 "const body = objects[0].collider;",
                 "",
                 "if(body){",
-                "body.restitution = eventsFunctionContext.getObjects(\"Value\");",
+                "body.restitution = eventsFunctionContext.getArgument(\"Value\");",
                 "}",
                 ""
               ],
@@ -16464,10 +17088,10 @@
           "objectGroups": []
         },
         {
-          "description": "Set collider type",
-          "fullName": "Set collider type",
+          "description": "Set body type",
+          "fullName": "Set body type",
           "functionType": "Action",
-          "group": "Collider properties",
+          "group": "Physics 3D Body properties",
           "name": "SetType",
           "sentence": "Set _PARAM0_ type_PARAM2_",
           "events": [
@@ -16477,7 +17101,7 @@
                 "const body = objects[0].collider;",
                 "",
                 "if(body){",
-                "body.type = eventsFunctionContext.getObjects(\"Value\");",
+                "body.type = eventsFunctionContext.getArgument(\"Value\");",
                 "}",
                 ""
               ],
@@ -16509,10 +17133,10 @@
           "objectGroups": []
         },
         {
-          "description": "Set collider angular dampling ",
-          "fullName": "Set collider angular dampling ",
+          "description": "Set body angular dampling ",
+          "fullName": "Set body angular dampling ",
           "functionType": "Action",
-          "group": "Collider damping properties",
+          "group": "Physics 3D Body properties",
           "name": "SetAngDampling",
           "sentence": "Set _PARAM0_ angular dampling  _PARAM2_",
           "events": [
@@ -16522,7 +17146,7 @@
                 "const body = objects[0].collider;",
                 "",
                 "if(body){",
-                "body.angularDamping = eventsFunctionContext.getObjects(\"Value\");",
+                "body.angularDamping = eventsFunctionContext.getArgument(\"Value\");",
                 "}",
                 ""
               ],
@@ -16553,10 +17177,10 @@
           "objectGroups": []
         },
         {
-          "description": "Set collider linear dampling ",
-          "fullName": "Set collider linear dampling ",
+          "description": "Set body linear dampling ",
+          "fullName": "Set body linear dampling ",
           "functionType": "Action",
-          "group": "Collider dampling properties",
+          "group": "Physics 3D Body properties",
           "name": "SetLinDampling",
           "sentence": "Set _PARAM0_ linear dampling  _PARAM2_",
           "events": [
@@ -16566,7 +17190,7 @@
                 "const body = objects[0].collider;",
                 "",
                 "if(body){",
-                "body.linearDamping = eventsFunctionContext.getObjects(\"Value\");",
+                "body.linearDamping = eventsFunctionContext.getArgument(\"Value\");",
                 "}",
                 ""
               ],
@@ -16592,6 +17216,50 @@
               "description": "Value (0-1)",
               "name": "Value",
               "type": "expression"
+            }
+          ],
+          "objectGroups": []
+        },
+        {
+          "description": "Set body fixed rotation",
+          "fullName": "Set body fixed rotation",
+          "functionType": "Action",
+          "group": "Physics 3D Body properties",
+          "name": "SetFixedRotation",
+          "sentence": "Set _PARAM0_ fixed rotation  _PARAM2_",
+          "events": [
+            {
+              "type": "BuiltinCommonInstructions::JsCode",
+              "inlineCode": [
+                "const body = objects[0].collider;",
+                "",
+                "if(body){",
+                "body.fixedRotation = eventsFunctionContext.getArgument(\"Value\");",
+                "}",
+                ""
+              ],
+              "parameterObjects": "Object",
+              "useStrict": true,
+              "eventsSheetExpanded": false
+            }
+          ],
+          "parameters": [
+            {
+              "description": "Object",
+              "name": "Object",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "object"
+            },
+            {
+              "description": "Behavior",
+              "name": "Behavior",
+              "supplementaryInformation": "Physics3D::Physics3D",
+              "type": "behavior"
+            },
+            {
+              "description": "Fixed rotation",
+              "name": "Value",
+              "type": "trueorfalse"
             }
           ],
           "objectGroups": []
@@ -17371,9 +18039,63 @@
           "objectGroups": []
         },
         {
+          "description": "Check collisions",
+          "fullName": "Check collisions",
+          "functionType": "Condition",
+          "name": "Collision",
+          "sentence": "_PARAM0_ collided with _PARAM2_",
+          "events": [
+            {
+              "type": "BuiltinCommonInstructions::JsCode",
+              "inlineCode": [
+                "const CANNON = gdjs._3DphysicsExt.get(\"CannonJS\");",
+                "const world = runtimeScene._CannonJS.world;",
+                "",
+                "const objects2 = eventsFunctionContext.getObjects(\"Object2\");",
+                "",
+                "var bodyA = objects[0].collider;",
+                "var bodyB = objects2[0].collider;",
+                "",
+                "if(bodyA && bodyB){",
+                "var contacts = [];",
+                "world.narrowphase.getContacts([bodyA], [bodyB], world, contacts, [], [], []);",
+                "",
+                "if (contacts.length > 0) {",
+                "    eventsFunctionContext.returnValue = true;",
+                "}}",
+                ""
+              ],
+              "parameterObjects": "Object",
+              "useStrict": true,
+              "eventsSheetExpanded": true
+            }
+          ],
+          "parameters": [
+            {
+              "description": "Object",
+              "name": "Object",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "object"
+            },
+            {
+              "description": "Behavior",
+              "name": "Behavior",
+              "supplementaryInformation": "Physics3D::Physics3D",
+              "type": "behavior"
+            },
+            {
+              "description": "Object 2",
+              "name": "Object2",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "objectList"
+            }
+          ],
+          "objectGroups": []
+        },
+        {
           "fullName": "Get X Velocity",
           "functionType": "Expression",
-          "group": "Velocity",
+          "group": "Physics 3D Velocity",
           "name": "XVelocity",
           "sentence": "",
           "events": [
@@ -17415,7 +18137,7 @@
         {
           "fullName": "Get Y Velocity",
           "functionType": "Expression",
-          "group": "Velocity",
+          "group": "Physics 3D Velocity",
           "name": "YVelocity",
           "sentence": "",
           "events": [
@@ -17457,7 +18179,7 @@
         {
           "fullName": "Get Z Velocity",
           "functionType": "Expression",
-          "group": "Velocity",
+          "group": "Physics 3D Velocity",
           "name": "ZVelocity",
           "sentence": "",
           "events": [
@@ -17499,7 +18221,7 @@
         {
           "fullName": "Get Mass",
           "functionType": "Expression",
-          "group": "Properties",
+          "group": "Physics 3D Body properties",
           "name": "Mass",
           "sentence": "",
           "events": [
@@ -17541,7 +18263,7 @@
         {
           "fullName": "Get Friction",
           "functionType": "Expression",
-          "group": "Properties",
+          "group": "Physics 3D Body properties",
           "name": "Friction",
           "sentence": "",
           "events": [
@@ -17583,7 +18305,7 @@
         {
           "fullName": "Get Restitution",
           "functionType": "Expression",
-          "group": "Properties",
+          "group": "Physics 3D Body properties",
           "name": "Restitution",
           "sentence": "",
           "events": [
@@ -17625,7 +18347,7 @@
         {
           "fullName": "Get Angular damping",
           "functionType": "Expression",
-          "group": "Damping",
+          "group": "Physics 3D Damping",
           "name": "AngularDamping",
           "sentence": "",
           "events": [
@@ -17667,7 +18389,7 @@
         {
           "fullName": "Get Linear damping",
           "functionType": "Expression",
-          "group": "Damping",
+          "group": "Physics 3D Damping",
           "name": "LinearDamping",
           "sentence": "",
           "events": [
@@ -17714,7 +18436,7 @@
           "unit": "Dimensionless",
           "label": "Mass",
           "description": "",
-          "group": "",
+          "group": "Body properties",
           "extraInformation": [],
           "name": "Mass"
         },
@@ -17724,7 +18446,7 @@
           "unit": "Dimensionless",
           "label": "Friction",
           "description": "",
-          "group": "",
+          "group": "Body properties",
           "extraInformation": [],
           "name": "Friction"
         },
@@ -17734,7 +18456,7 @@
           "unit": "Dimensionless",
           "label": "Restitution",
           "description": "",
-          "group": "",
+          "group": "Body properties",
           "extraInformation": [],
           "name": "Restitution"
         },
@@ -17757,6 +18479,24 @@
           "group": "Damping",
           "extraInformation": [],
           "name": "AngularDamping"
+        },
+        {
+          "value": "",
+          "type": "Boolean",
+          "label": "Fixed Rotation",
+          "description": "",
+          "group": "Body options",
+          "extraInformation": [],
+          "name": "FixedRotation"
+        },
+        {
+          "value": "true",
+          "type": "Boolean",
+          "label": "Can sleep",
+          "description": "",
+          "group": "Body options",
+          "extraInformation": [],
+          "name": "Sleep"
         },
         {
           "value": "Dynamic",
@@ -17949,7 +18689,6 @@
                 "boxBody.velocity.y += direction.y;",
                 "",
                 "const maxSpeed = moveDistance;",
-                "//boxBody.material.friction = 0.1;",
                 "",
                 "if (boxBody.velocity.length() > maxSpeed) {",
                 "    const velocityXY = new CANNON.Vec3(boxBody.velocity.x, boxBody.velocity.y, 0);",
