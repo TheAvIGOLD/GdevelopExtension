@@ -1,0 +1,208 @@
+{
+  "author": "",
+  "category": "General",
+  "extensionNamespace": "",
+  "fullName": "LOD (Level of Detail)",
+  "helpPath": "",
+  "iconUrl": "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAyMy4wLjMsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iSWNvbnMiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4Ig0KCSB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDMyIDMyOyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+DQo8cGF0aCBkPSJNMzEuOCwxNS45QzMxLjUsMTUuNSwyNC43LDYsMTYsNlMwLjUsMTUuNSwwLjIsMTUuOWMtMC4yLDAuMy0wLjIsMC44LDAsMS4yQzAuNSwxNy41LDcuMywyNywxNiwyN3MxNS41LTkuNSwxNS44LTkuOQ0KCUMzMi4xLDE2LjcsMzIuMSwxNi4zLDMxLjgsMTUuOXogTTE1LDIzLjZsLTUuNC0yLjdDOS4yLDIwLjcsOSwyMC40LDksMjB2LTZsNiwyLjdWMjMuNnogTTkuNiwxMi4xbDUuOS0zYzAuMy0wLjEsMC42LTAuMSwwLjksMA0KCWw1LjksM0wxNiwxNC45TDkuNiwxMi4xeiBNMjMsMjBjMCwwLjQtMC4yLDAuNy0wLjYsMC45TDE3LDIzLjZ2LTdsNi0yLjdWMjB6Ii8+DQo8L3N2Zz4NCg==",
+  "name": "LOD",
+  "previewIconUrl": "https://asset-resources.gdevelop.io/public-resources/Icons/Glyphster Pack/Master/SVG/Virtual Reality/3fa7d6272e3a950e5411964579e935aec93b25a8d50a18208a5aab7bc54df76b_Virtual Reality_3d_vision_vr.svg",
+  "shortDescription": "",
+  "version": "0.0.1",
+  "description": "",
+  "tags": [
+    "3D"
+  ],
+  "authorIds": [
+    "l2OaORwcgyX7y4HQY2dHPmdTuDj2"
+  ],
+  "dependencies": [],
+  "eventsFunctions": [
+    {
+      "fullName": "",
+      "functionType": "Action",
+      "name": "onFirstSceneLoaded",
+      "sentence": "",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [],
+          "actions": [
+            {
+              "type": {
+                "value": "ModVarGlobal"
+              },
+              "parameters": [
+                "__Lod_timer",
+                "=",
+                "0.001"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "runtimeScene._lod = { objects: [] };",
+            "const camera = runtimeScene.getLayer('').getRenderer().getThreeCamera();",
+            "",
+            "function animate() {",
+            "",
+            "    var time = runtimeScene.getGame().getVariables().get(\"__Lod_timer\").getAsNumber();",
+            "",
+            "    ",
+            "    runtimeScene._lod.objects.forEach(function(obj) {",
+            "    ",
+            "    const modelData = obj.object;",
+            "    const model = modelData.get3DRendererObject();",
+            "    const low = obj.low;",
+            "    const medium = obj.medium;",
+            "    const hight = obj.hight;",
+            "",
+            "    const lowDis = obj.lowDis;",
+            "    const mediumDis = obj.mediumDis;",
+            "    ",
+            "    var cameraPosition = camera.position.clone();",
+            "    cameraPosition.y *= -1;",
+            "",
+            "    var distance = cameraPosition.distanceTo(model.position);",
+            "",
+            "    if (distance <= mediumDis) {",
+            "        low.visible = false;",
+            "        medium.visible = false;",
+            "        hight.visible = true;",
+            "    } else if (distance <= lowDis){",
+            "        low.visible = false;",
+            "        medium.visible = true;  ",
+            "        hight.visible = false;",
+            "    } else {",
+            "        low.visible = true;",
+            "        medium.visible = false;  ",
+            "        hight.visible = false;",
+            "    }",
+            "});",
+            "",
+            "setTimeout(animate, time * 1000);",
+            "}",
+            "",
+            "animate();"
+          ],
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": true
+        }
+      ],
+      "parameters": [],
+      "objectGroups": []
+    },
+    {
+      "description": "Set LOD for object.",
+      "fullName": "Set LOD",
+      "functionType": "Action",
+      "group": "LOD",
+      "name": "SetLod",
+      "sentence": "Set LOD for _PARAM1_ models: low _PARAM2_, medium _PARAM3_, hight _PARAM4_. Distance to display: low _PARAM5_, medium _PARAM6_",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "const objectsArray = runtimeScene._lod.objects;",
+            "",
+            "const model = objects[0].get3DRendererObject();",
+            "",
+            "const low = model.getObjectByName(eventsFunctionContext.getArgument(\"Low\"));",
+            "const medium = model.getObjectByName(eventsFunctionContext.getArgument(\"Med\"));",
+            "const hight = model.getObjectByName(eventsFunctionContext.getArgument(\"Hight\"));",
+            "",
+            "const lowDis = eventsFunctionContext.getArgument(\"LowDistance\");",
+            "const mediumDis = eventsFunctionContext.getArgument(\"MedDistance\");",
+            "",
+            "if (!objects[0]._lod){",
+            "objectsArray.push({ ",
+            "    object: objects[0], ",
+            "    low: low,",
+            "    medium: medium,",
+            "    hight: hight,",
+            "    lowDis: lowDis, ",
+            "    mediumDis: mediumDis",
+            "});",
+            "",
+            "objects[0]._lod = true;}"
+          ],
+          "parameterObjects": "Object",
+          "useStrict": true,
+          "eventsSheetExpanded": true
+        }
+      ],
+      "parameters": [
+        {
+          "description": "Object",
+          "name": "Object",
+          "supplementaryInformation": "Scene3D::Model3DObject",
+          "type": "objectList"
+        },
+        {
+          "description": "Low model name",
+          "name": "Low",
+          "type": "string"
+        },
+        {
+          "description": "Medium model name",
+          "name": "Med",
+          "type": "string"
+        },
+        {
+          "description": "Hight model name",
+          "name": "Hight",
+          "type": "string"
+        },
+        {
+          "description": "Low model display distance",
+          "name": "LowDistance",
+          "type": "expression"
+        },
+        {
+          "description": "Medium model display distance",
+          "name": "MedDistance",
+          "type": "expression"
+        }
+      ],
+      "objectGroups": []
+    },
+    {
+      "description": "Set LOD refresh rate.",
+      "fullName": "Set LOD refresh rate",
+      "functionType": "Action",
+      "name": "SetTimer",
+      "sentence": "Set LOD rate _PARAM1_",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [],
+          "actions": [
+            {
+              "type": {
+                "value": "ModVarGlobal"
+              },
+              "parameters": [
+                "__Lod_timer",
+                "=",
+                "Rate"
+              ]
+            }
+          ]
+        }
+      ],
+      "parameters": [
+        {
+          "description": "Value in seconds (default: 0.001)",
+          "name": "Rate",
+          "type": "expression"
+        }
+      ],
+      "objectGroups": []
+    }
+  ],
+  "eventsBasedBehaviors": [],
+  "eventsBasedObjects": []
+}
