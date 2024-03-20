@@ -8,7 +8,7 @@
   "name": "LOD",
   "previewIconUrl": "https://asset-resources.gdevelop.io/public-resources/Icons/Glyphster Pack/Master/SVG/Virtual Reality/3fa7d6272e3a950e5411964579e935aec93b25a8d50a18208a5aab7bc54df76b_Virtual Reality_3d_vision_vr.svg",
   "shortDescription": "",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "tags": [
     "3D"
@@ -43,6 +43,53 @@
         {
           "type": "BuiltinCommonInstructions::JsCode",
           "inlineCode": [
+            "runtimeScene._lod = { objects: []};",
+            "const camera = runtimeScene.getLayer('').getRenderer().getThreeCamera();",
+            "",
+            "function animate() {",
+            "",
+            "    var time = runtimeScene.getGame().getVariables().get(\"__Lod_timer\").getAsNumber();",
+            "",
+            "    ",
+            "    runtimeScene._lod.objects.forEach(function(obj) {",
+            "    ",
+            "    const modelData = obj.object;",
+            "    const model = modelData.get3DRendererObject();",
+            "    const low = obj.low;",
+            "    const medium = obj.medium;",
+            "    const hight = obj.hight;",
+            "",
+            "    const lowDis = obj.lowDis;",
+            "    const mediumDis = obj.mediumDis;",
+            "    ",
+            "    var cameraPosition = camera.position.clone();",
+            "    cameraPosition.y *= -1;",
+            "",
+            "    var distance = cameraPosition.distanceTo(model.position);",
+            "",
+            "    modelData._lodHig = distance < mediumDis;",
+            "    modelData._lodMid = distance > mediumDis && distance < lowDis;",
+            "    modelData._lodLow = distance > lowDis;",
+            "",
+            "    low.visible = modelData._lodLow;",
+            "    medium.visible = modelData._lodMid;  ",
+            "    hight.visible = modelData._lodHig;",
+            "});",
+            "",
+            "",
+            "setTimeout(animate, time * 1000);",
+            "}",
+            "",
+            "animate();"
+          ],
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": true
+        },
+        {
+          "disabled": true,
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
             "runtimeScene._lod = { objects: [] };",
             "const camera = runtimeScene.getLayer('').getRenderer().getThreeCamera();",
             "",
@@ -67,19 +114,27 @@
             "",
             "    var distance = cameraPosition.distanceTo(model.position);",
             "",
-            "    if (distance <= mediumDis) {",
-            "        low.visible = false;",
-            "        medium.visible = false;",
-            "        hight.visible = true;",
-            "    } else if (distance <= lowDis){",
-            "        low.visible = false;",
-            "        medium.visible = true;  ",
-            "        hight.visible = false;",
+            "    modelData._lodLow = distance <= mediumDis;",
+            "    modelData._lodMid = distance > mediumDis && distance < lowDis;",
+            "    modelData._lodHig = distance => lowDis;",
+            "",
+            "    if (distance < mediumDis) {",
+            "        modelData._lodLow = false;",
+            "        modelData._lodMid = false;",
+            "        modelData._lodHig = true;",
+            "    } else if (distance < lowDis){",
+            "        modelData._lodLow = false;",
+            "        modelData._lodMid = true;",
+            "        modelData._lodHig = false;",
             "    } else {",
-            "        low.visible = true;",
-            "        medium.visible = false;  ",
-            "        hight.visible = false;",
+            "        modelData._lodLow = true;",
+            "        modelData._lodMid = false;",
+            "        modelData._lodHig = false;",
             "    }",
+            "",
+            "        low.visible = modelData._lodLow;",
+            "        medium.visible = modelData._lodMid;  ",
+            "        hight.visible = modelData._lodHig;",
             "});",
             "",
             "setTimeout(animate, time * 1000);",
@@ -198,6 +253,86 @@
           "description": "Value in seconds (default: 0.001)",
           "name": "Rate",
           "type": "expression"
+        }
+      ],
+      "objectGroups": []
+    },
+    {
+      "description": "Is LOD layer visible.",
+      "fullName": "Is LOD layer visible",
+      "functionType": "Condition",
+      "group": "LOD",
+      "name": "LayerVisible",
+      "sentence": "_PARAM1_ LOD layer _PARAM2_ is visible",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "const layer = eventsFunctionContext.getArgument(\"Layer\");",
+            "const lodLevels = {",
+            "    \"Low\": \"_lodLow\",",
+            "    \"Medium\": \"_lodMid\",",
+            "    \"Hight\": \"_lodHig\"",
+            "};",
+            "",
+            "if (layer in lodLevels && objects[0][lodLevels[layer]]) {",
+            "    eventsFunctionContext.returnValue = true;",
+            "} "
+          ],
+          "parameterObjects": "Object",
+          "useStrict": true,
+          "eventsSheetExpanded": true
+        }
+      ],
+      "parameters": [
+        {
+          "description": "Object",
+          "name": "Object",
+          "type": "objectList"
+        },
+        {
+          "description": "Layer",
+          "name": "Layer",
+          "supplementaryInformation": "[\"Low\",\"Medium\",\"Hight\"]",
+          "type": "stringWithSelector"
+        }
+      ],
+      "objectGroups": []
+    },
+    {
+      "description": "Get distance from camera to object.",
+      "fullName": "Get distance from camera to object",
+      "functionType": "Expression",
+      "name": "GetCameraDistance",
+      "sentence": "",
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": [
+            "const camera = runtimeScene.getLayer('').getRenderer().getThreeCamera();",
+            "",
+            "const model = objects[0].get3DRendererObject();",
+            "",
+            "var cameraPosition = camera.position.clone();",
+            "cameraPosition.y *= -1;",
+            "",
+            "var distance = cameraPosition.distanceTo(model.position);",
+            "",
+            "eventsFunctionContext.returnValue = distance;"
+          ],
+          "parameterObjects": "Object",
+          "useStrict": true,
+          "eventsSheetExpanded": false
+        }
+      ],
+      "expressionType": {
+        "type": "expression"
+      },
+      "parameters": [
+        {
+          "description": "Object",
+          "name": "Object",
+          "type": "objectList"
         }
       ],
       "objectGroups": []
