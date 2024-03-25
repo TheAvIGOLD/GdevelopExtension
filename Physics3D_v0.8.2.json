@@ -8,7 +8,7 @@
   "name": "Physics3D",
   "previewIconUrl": "https://asset-resources.gdevelop.io/public-resources/Icons/2cbc7d01420084b3a820e1cbc6a894823de82a3c5fe02ac7b4a9615a226df169_cube-send.svg",
   "shortDescription": "An extension adding 3D physics for models.",
-  "version": "0.0.8",
+  "version": "0.8.2",
   "description": [
     "The extension allows adding 3D physics to models. To use it, add the physics behavior to the desired object, configure its physical parameters such as mass, friction, restitution, etc., then add shapes for collision handling in the actions.",
     "",
@@ -15256,7 +15256,7 @@
               ],
               "parameterObjects": "Object",
               "useStrict": true,
-              "eventsSheetExpanded": true
+              "eventsSheetExpanded": false
             }
           ],
           "parameters": [
@@ -16703,14 +16703,15 @@
             {
               "type": "BuiltinCommonInstructions::JsCode",
               "inlineCode": [
-                "const boxBody = objects[0].collider;",
+                "const body = objects[0].collider;",
                 "",
                 "var newX = eventsFunctionContext.getArgument(\"X\"); ",
                 "var newY = eventsFunctionContext.getArgument(\"Y\"); ",
                 "var newZ = eventsFunctionContext.getArgument(\"Z\"); ",
                 "",
-                "boxBody.position.set(newX,newY,newZ);",
-                ""
+                "if(body){",
+                "body.position.set(newX,newY,newZ);",
+                "}"
               ],
               "parameterObjects": "Object",
               "useStrict": true,
@@ -16759,11 +16760,12 @@
             {
               "type": "BuiltinCommonInstructions::JsCode",
               "inlineCode": [
-                "const boxBody = objects[0].collider;",
+                "const body = objects[0].collider;",
                 "var newX = eventsFunctionContext.getArgument(\"X\"); ",
                 "",
-                "boxBody.position.x = newX;",
-                ""
+                "if(body){",
+                "body.position.x = newX;",
+                "}"
               ],
               "parameterObjects": "Object",
               "useStrict": true,
@@ -16802,11 +16804,12 @@
             {
               "type": "BuiltinCommonInstructions::JsCode",
               "inlineCode": [
-                "const boxBody = objects[0].collider;",
+                "const body = objects[0].collider;",
                 "var newY = eventsFunctionContext.getArgument(\"Y\"); ",
                 "",
-                "boxBody.position.y = newY;",
-                ""
+                "if(body){",
+                "body.position.y = newY;",
+                "}"
               ],
               "parameterObjects": "Object",
               "useStrict": true,
@@ -16845,11 +16848,12 @@
             {
               "type": "BuiltinCommonInstructions::JsCode",
               "inlineCode": [
-                "const boxBody = objects[0].collider;",
+                "const body = objects[0].collider;",
                 "var newZ = eventsFunctionContext.getArgument(\"Z\"); ",
                 "",
-                "boxBody.position.z = newZ;",
-                ""
+                "if(body){",
+                "body.position.z = newZ;",
+                "}"
               ],
               "parameterObjects": "Object",
               "useStrict": true,
@@ -18375,6 +18379,44 @@
               "name": "Object2",
               "supplementaryInformation": "Scene3D::Model3DObject",
               "type": "objectList"
+            }
+          ],
+          "objectGroups": []
+        },
+        {
+          "description": "Check if the object is sleeping.",
+          "fullName": "Is sleeping",
+          "functionType": "Condition",
+          "name": "IsSleep",
+          "sentence": "Is _PARAM0_ sleeping",
+          "events": [
+            {
+              "type": "BuiltinCommonInstructions::JsCode",
+              "inlineCode": [
+                "var body = objects[0].collider;",
+                "",
+                "if(body && body.sleepState === CANNON.Body.SLEEPING){",
+                "    eventsFunctionContext.returnValue = true;",
+                "}",
+                ""
+              ],
+              "parameterObjects": "Object",
+              "useStrict": true,
+              "eventsSheetExpanded": true
+            }
+          ],
+          "parameters": [
+            {
+              "description": "Object",
+              "name": "Object",
+              "supplementaryInformation": "Scene3D::Model3DObject",
+              "type": "object"
+            },
+            {
+              "description": "Behavior",
+              "name": "Behavior",
+              "supplementaryInformation": "Physics3D::Physics3D",
+              "type": "behavior"
             }
           ],
           "objectGroups": []
