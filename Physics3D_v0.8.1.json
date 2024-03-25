@@ -16368,15 +16368,16 @@
             {
               "type": "BuiltinCommonInstructions::JsCode",
               "inlineCode": [
-                "const boxBody = objects[0].collider;",
+                "const body = objects[0].collider;",
                 "",
                 "var newX = eventsFunctionContext.getArgument(\"X\"); ",
                 "var newY = eventsFunctionContext.getArgument(\"Y\"); ",
                 "var newZ = eventsFunctionContext.getArgument(\"Z\"); ",
                 "",
-                "boxBody.wakeUp();",
-                "boxBody.velocity.set(newX,newY,newZ);",
-                ""
+                "if(body){",
+                "body.wakeUp();",
+                "body.velocity.set(newX,newY,newZ);",
+                "}"
               ],
               "parameterObjects": "Object",
               "useStrict": true,
@@ -16499,13 +16500,14 @@
             {
               "type": "BuiltinCommonInstructions::JsCode",
               "inlineCode": [
-                "const boxBody = objects[0].collider;",
+                "const body = objects[0].collider;",
                 "",
-                "var newX = eventsFunctionContext.getArgument(\"X\"); ",
+                "var newX = eventsFunctionContext.getArgument(\"Value\"); ",
                 "",
-                "boxBody.wakeUp();",
-                "boxBody.velocity.x = newX;",
-                ""
+                "if(body){",
+                "body.wakeUp();",
+                "body.velocity.x = newX;",
+                "}"
               ],
               "parameterObjects": "Object",
               "useStrict": true,
@@ -16527,7 +16529,7 @@
             },
             {
               "description": "Value",
-              "name": "X",
+              "name": "Value",
               "type": "expression"
             }
           ],
@@ -16544,12 +16546,14 @@
             {
               "type": "BuiltinCommonInstructions::JsCode",
               "inlineCode": [
-                "const boxBody = objects[0].collider;",
+                "const body = objects[0].collider;",
                 "",
-                "var newY = eventsFunctionContext.getArgument(\"Y\"); ",
+                "var newY = eventsFunctionContext.getArgument(\"Value\"); ",
                 "",
-                "boxBody.wakeUp();",
-                "boxBody.velocity.y = newY;",
+                "if(body) {",
+                "body.wakeUp();",
+                "body.velocity.y = newY;",
+                "}",
                 ""
               ],
               "parameterObjects": "Object",
@@ -16572,7 +16576,7 @@
             },
             {
               "description": "Value",
-              "name": "X",
+              "name": "Value",
               "type": "expression"
             }
           ],
@@ -16589,13 +16593,14 @@
             {
               "type": "BuiltinCommonInstructions::JsCode",
               "inlineCode": [
-                "const boxBody = objects[0].collider;",
+                "const body = objects[0].collider;",
                 "",
-                "var newZ = eventsFunctionContext.getArgument(\"Z\"); ",
+                "var newZ = eventsFunctionContext.getArgument(\"Value\"); ",
                 "",
-                "boxBody.wakeUp();",
-                "boxBody.velocity.z = newZ;",
-                ""
+                "if(body){",
+                "body.wakeUp();",
+                "body.velocity.z = newZ;",
+                "}"
               ],
               "parameterObjects": "Object",
               "useStrict": true,
@@ -16617,7 +16622,7 @@
             },
             {
               "description": "Value",
-              "name": "Z",
+              "name": "Value",
               "type": "expression"
             }
           ],
